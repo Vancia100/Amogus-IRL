@@ -16,7 +16,6 @@ body{
     background-color: rgb(202, 53, 53);
     border-radius: 40px;
     margin-bottom: 50px;
-    padding: auto;
     border: 3px solid rgb(0, 0, 0);
     text-align: center;
     min-height: 50px;
@@ -24,4 +23,10 @@ body{
 .button:hover{
   background-color: rgb(203, 81, 81);
   border: 5px solid rgb(255, 255, 255);
+}
+#backButton{
+  max-width: 25%;
+  min-width: 200px;
+  margin-top: auto;
+  margin-right: auto;
 }
