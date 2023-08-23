@@ -1,29 +1,41 @@
+@font-face {
+  font-family: AmogosFont;
+  src: url(fonts/Impostograph-Regular.ttf);
+  font-weight: normal;
+  font-style: normal;
+}
+
 body{
-  background-color: rgb(43, 36, 36);
+  background-color: rgb(21, 20, 20);
   }
   .box{
     min-height: 25%;
     text-align: center;
   }
   #text1{
-    color: rgb(135, 215, 85);
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: rgb(235, 223, 223);
+    font-family: "AmogosFont", sans-serif;
   }
   .button{
-    display: block;
+    font-size: 2em;
+    letter-spacing: .7rem;
+    padding: 0;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
     width: 50%;
-    min-width: 50%;
     margin:auto;
-    background-color: rgb(202, 53, 53);
-    border-radius: 40px;
+    background-color: transparent;
+    border-radius: 10px;
     margin-bottom: 50px;
-    border: 3px solid rgb(0, 0, 0);
+    border: 3px solid rgb(255, 255, 255);
     text-align: center;
     min-height: 50px;
+    max-height: 100px;
     cursor: pointer;
 }
 .button:hover{
-  background-color: rgb(203, 81, 81);
+  background-color: rgb(41, 38, 38);
   border: 5px solid rgb(255, 255, 255);
 }
 #backButton{
@@ -38,15 +50,40 @@ body{
 
 }
 #backButtonEmbeded{
+  background-color: rgb(32, 29, 26);
   position: inherit;
+  font-size: 1em;
   left: 15px;
   bottom: 15px;
   margin-bottom: 0;
   max-width: 20%;
   min-width: 10%;
-  max-height: inherit;
+  max-height: 10%;
   min-height: 40px;
   height: auto;
   width:auto;
   float: left;
+}
+#backButtonEmbeded:hover{
+  background-color: rgb(65, 48, 48);
+}
+#nameInput{
+  padding: 10px;
+  font-size: 20px;
+  cursor: text;
+  font-family: "AmogosFont";
+  color: rgb(235, 223, 223);
+  font-size: 1.3em;
+  font-weight: bold;
+  letter-spacing: 0.3em;
+  font-size: 40px;
+}
+#nameInput::placeholder{
+  color: rgb(235, 223, 223);
+  font-size: 1.3em;
+  font-family: "AmogosFont";
+}
+#nameInput:focus{
+  box-shadow:0;
+  outline:0;
 }
