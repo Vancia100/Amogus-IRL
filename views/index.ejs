@@ -1,16 +1,40 @@
 
-    <form action="" method="get">
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const usernameInput = document.getElementById("usernameForm");
+    usernameInput.addEventListener("submit", function (event) {
+        event.preventDefault()
+        Load()
+    })
+})
+function Load () {
+
+    var usernameInput = document.getElementById("nameInput").value
+    if ( !(usernameInput && usernameInput.length > 2)) {
+        usernameInput = window.prompt("You need to input a valid username!")
+        return
+    }
+    console.log(usernameInput.toUpperCase())
+}
+</script>
+
+<div class= buttonContainer>
+    <form  method="get" id = usernameForm>
         <input type="text" class="button" id="nameInput" required minlength="3" maxlength="15" placeholder="Username">
     </form>
-<div class = "button">
+    
+    <button class = "button" id="joinBtn" onclick="Load()">
     <h3 id="text1">
         Join
     </h3>
+    </button>
+    
+    <a href="/host">
+        <div class = "button">
+            <h3 id="text1">
+                host
+            </h3>
+        </div>
+    </a>
 </div>
-<a href="/host">
-    <div class = "button">
-        <h3 id="text1">
-            Host
-        </h3>
-    </div>
-</a>
+

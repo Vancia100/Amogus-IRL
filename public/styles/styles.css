@@ -7,31 +7,44 @@
 
 body{
   background-color: rgb(21, 20, 20);
+
   }
-  .box{
-    min-height: 25%;
-    text-align: center;
+.box{
+  min-height: 25%;
+  text-align: center;
+  font-family: "AmogosFont";
+  color: white;
+  font-size: 100px;
+}
+  .buttonContainer{
+    position: initial;
+    bottom: auto;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
   }
   #text1{
     color: rgb(235, 223, 223);
-    font-family: "AmogosFont", sans-serif;
+    font-family: "AmogosFont";
+    font-size: 40px;
   }
   .button{
+    width: 300px;
     font-size: 2em;
     letter-spacing: .7rem;
     padding: 0;
     box-sizing: border-box;
     display: grid;
     place-items: center;
-    width: 50%;
+    min-width: max-content;
     margin:auto;
     background-color: transparent;
     border-radius: 10px;
-    margin-bottom: 50px;
+    margin-top: 25px;
+    margin-bottom: 25px;
     border: 3px solid rgb(255, 255, 255);
     text-align: center;
-    min-height: 50px;
-    max-height: 100px;
+    height: 100px;
     cursor: pointer;
 }
 .button:hover{
@@ -57,12 +70,13 @@ body{
   bottom: 15px;
   margin-bottom: 0;
   max-width: 20%;
-  min-width: 10%;
+  min-width: 15%;
   max-height: 10%;
   min-height: 40px;
   height: auto;
   width:auto;
   float: left;
+  padding: 0;
 }
 #backButtonEmbeded:hover{
   background-color: rgb(65, 48, 48);
@@ -73,7 +87,7 @@ body{
   cursor: text;
   font-family: "AmogosFont";
   color: rgb(235, 223, 223);
-  font-size: 1.3em;
+  font-size: 40px;
   font-weight: bold;
   letter-spacing: 0.3em;
   font-size: 40px;
