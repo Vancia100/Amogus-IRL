@@ -1,22 +1,7 @@
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const usernameInput = document.getElementById("usernameForm");
-    usernameInput.addEventListener("submit", function (event) {
-        event.preventDefault()
-        Load()
-    })
-})
-function Load () {
-
-    var usernameInput = document.getElementById("nameInput").value
-    if ( !(usernameInput && usernameInput.length > 2)) {
-        usernameInput = window.prompt("You need to input a valid username!")
-        return
-    }
-    console.log(usernameInput.toUpperCase())
-}
-</script>
+<div class = box>
+    <h1>Amogos</h1>
+</div>
 
 <div class= buttonContainer>
     <form  method="get" id = usernameForm>
@@ -38,3 +23,37 @@ function Load () {
     </a>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const usernameInput = document.getElementById("usernameForm");
+        usernameInput.addEventListener("submit", function (event) {
+            event.preventDefault()
+            Load()
+        })
+    
+            const usernameField = document.getElementById("nameInput")
+            usernameField.addEventListener("focus", () => {
+            usernameField.style.borderColor = "#ffffff"
+        })
+            usernameField.addEventListener("blur", () => {
+                const usernameValue = usernameField.value
+                checkUsername(usernameValue, (username) => {
+                usernameField.style.borderColor = "#ffffff"
+                }) 
+            })
+    })
+    function checkUsername(username, cb) {
+        if ( !(username && username.length > 2)) {
+            const usernameField = document.getElementById("nameInput")
+            usernameField.style.borderColor = "#b53933"
+            return
+        }
+        cb(username)
+    }
+    function Load() {
+        var usernameInput = document.getElementById("nameInput").value
+        checkUsername(usernameInput, (username) => {
+            console.log(username.toUpperCase())
+        })
+    }
+    </script>
