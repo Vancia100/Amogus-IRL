@@ -1,7 +1,62 @@
-.show {
+.settingsMenue.show {
     display: block;
 }
 
 .settingsMenue{
     display: none;
+    width: 100%;
+    overflow-y: auto;
+    max-height: 45vh;
+    max-width: 90vw;
+    border: 5px solid rgb(46, 38, 38);
+    border-radius: 15px;
+    background-color: rgba(34, 24, 24, 0.834);
+}
+
+.settingsOption{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 80vw;
+    height: 8vh;
+    padding: 10px;
+    background-color: rgb(21, 20, 20);
+    border-radius: 12px;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+    border: 3px solid rgb(51, 38, 38);
+}
+
+.hide {
+    display:none
+}
+
+
+#backButton{
+    display: inline-block;
+    position: fixed;
+    margin: 0;
+    margin-left: 0;
+    margin-bottom: 0;
+    background-color: rgb(32, 29, 26);
+    left: 15px;
+    bottom: 15px;
+    max-width: 20%;
+    min-width: 15%;
+    max-height: 10%;
+    min-height: 40px;
+    height: auto;
+    width:auto;
+}
+#backButtonEmbeded:hover{
+  background-color: rgb(65, 48, 48);
+}
+#backButtonText {
+  font-size: 4vh;
+}
+.arrowIcon{
+    height: 7vh;
+    padding: 14px;
+    transform: scaleX(-1);
+    cursor: pointer;
 }

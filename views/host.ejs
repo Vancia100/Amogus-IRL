@@ -7,7 +7,7 @@
 <script src="script/getOptions.js"> </script>
 
 <div class="buttonContainer">
-    <div class="button">
+    <div class="button" id="qrBtn">
         <h3 class = text1>
             QR-code
         </h3>
@@ -20,18 +20,33 @@
     </button>
     
     <div class="settingsMenue" id="settingsMenue">
-        <ul id="settingsList">
+        <ul id="settingslist">
             <li>
-                <div class="button">
+                <div class="settingsOption">
+                    <img src="pictures/arrow.png" alt="icon of a arrow" class="arrowIcon">
                     <h3 class="text1">
-                        What the fuck is a kilometer??!??!
+                        Long Task:
+                    </h3>
+                </div>
+            </li>
+            <li>
+                <div class="settingsOption">
+                    <h3 class="text1">
+                        Short Task:
+                    </h3>
+                </div>
+            </li>
+            <li>
+                <div class="settingsOption">
+                    <h3 class="text1">
+                        Normal Task:
                     </h3>
                 </div>
             </li>
         </ul>
     </div>
 
-    <button class="button">
+    <button class="button" id="startBtn">
         <h3 class = text1>
             Start!
         </h3>
@@ -42,7 +57,7 @@
                     <h3 class="text1" id="backButtonText">
                         Back
                     </h3>
-                </span>
+        </span>
     </a>
 
 

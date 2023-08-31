@@ -19,7 +19,7 @@ router.get("/get-options", (req, res) =>{
             taskList.push({"name":options.name, "type":options.type}) 
         }
         res.json(taskList)
-        console.log(taskList)
+        //console.log(taskList)/
     } catch (error) {
         res.status(500).json({"error":error})
         console.log(error)
