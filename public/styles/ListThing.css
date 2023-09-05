@@ -1,6 +1,4 @@
-.settingsMenue.show {
-    display: block;
-}
+
 
 .settingsMenue{
     display: none;
@@ -12,7 +10,9 @@
     border-radius: 15px;
     background-color: rgba(34, 24, 24, 0.834);
 }
-
+.settingsMenue ul {
+    list-style-type: none;
+}
 .settingsOption{
     display: flex;
     align-items: center;
@@ -27,10 +27,62 @@
     border: 3px solid rgb(51, 38, 38);
 }
 
+.enableOption{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 80vw;
+    height: 3vh;
+    padding: 10px;
+    background-color: rgba(35, 29, 29, 0.599);
+    border-radius: 8px;
+    margin-top: 0.5vh;
+    margin-bottom: 0.5vh;
+    border: 3px solid rgb(51, 38, 38);
+}
+
+.enableOption h3 {
+    font-size: 5vh;
+    letter-spacing: 4px;
+    margin-right: 10px;
+    border-color: black;
+    border-radius: 15px;
+}
+
+.enableOption input[type = "checkbox"]{
+    appearance: none;
+    width: 4.2vh;
+    height: 4.2vh;
+    margin: 0;
+    background-color: rgba(94, 55, 97, 0.249);
+    border: 3px solid rgb(153, 153, 153);
+    border-radius: 7px;
+    cursor: pointer;
+    color: black;
+    display: grid;
+    place-content: center;
+}
+
+.enableOption input[type="checkbox"]::before {
+    content: "";
+    width: 2.6vh;
+    height: 2.6vh;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 5vh 5vh rgb(22, 10, 29);
+    border-radius: 4px;
+    border-color: rgb(0, 0, 0);
+  }
+
+.enableOption input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }
 .hide {
     display:none
 }
-
+.settingsMenue.show {
+    display: block;
+}
 
 #backButton{
     display: inline-block;
