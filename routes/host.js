@@ -14,10 +14,10 @@ router.get("/", (req, res) => {
 router.get("/get-options", (req, res) =>{
     try {
         const directory = (__dirname + "\\..\\tasks\\")
+        try {
         const taskEnableJsonRaw = (fs.readFileSync(directory + "enabledTasks.json", {
             encoding: "utf-8", flag: "r"
         }))
-        try {
             var taskEnableJson = JSON.parse(taskEnableJsonRaw)
         } catch (error) {
             var taskEnableJson = {}
