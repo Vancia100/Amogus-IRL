@@ -1,6 +1,6 @@
 const taskBlueprint = require("../taskobject.js")
 
-const thisTask = new taskBlueprint("Sus Task", "Long",)
+const thisTask = new taskBlueprint("Sus Task", "normal",)
 
 thisTask.code = () => {
     "do some code..."

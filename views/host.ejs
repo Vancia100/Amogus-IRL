@@ -4,43 +4,40 @@
     <h1>Host Game</h1>
 </div>
 
-<script src="script/getOptions.js"> </script>
-
 <div class="buttonContainer">
-    <div class="button" id="qrBtn">
+    <button class="button" id="qrBtn" onclick="createAndDownloadPDF()">
         <h3 class = text1>
             QR-code
         </h3>
-    </div>
+    </button>
     
     <button class="button" id = "settingsBtn" onclick="requestOptions()">
         <h3 class = text1>
             Settings
         </h3>
+        
     </button>
     
     <div class="settingsMenue" id="settingsMenue">
         <ul id="settingslist">
             <li>
-                <div class="settingsOption">
-                    <img src="pictures/arrow.png" alt="icon of a arrow" class="arrowIcon">
-                    <h3 class="text1">
-                        Long Task:
-                    </h3>
+                <div class="settingsOption" id="short">
+                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon mirrored">
+                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon">
                 </div>
             </li>
             <li>
-                <div class="settingsOption">
-                    <h3 class="text1">
-                        Short Task:
-                    </h3>
+                <div class="settingsOption" id="normal">
+                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon mirrored">
+
+                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon">
                 </div>
             </li>
             <li>
-                <div class="settingsOption">
-                    <h3 class="text1">
-                        Normal Task:
-                    </h3>
+                <div class="settingsOption" id="long">
+                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon mirrored">
+
+                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon">
                 </div>
             </li>
             <br>
@@ -63,3 +60,5 @@
 
 
 </div>
+
+<script src="script/getOptions.js"> </script>

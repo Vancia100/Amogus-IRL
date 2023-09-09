@@ -1,14 +1,12 @@
 async function requestOptions () {
-
-console.log("button Pressed!")
+//console.log("button Pressed!")
 
     const settingsList = document.getElementById("settingsMenue")
     if(!settingsList.classList.contains("show")) {
         const response = await sendAPI()
         const ul = document.getElementById("settingslist")
         try {
-            //console.log(response)
-            for (const item of response) {
+            for (const item of response.list) {
                 const posibleItem = document.getElementById(item.name)
                 //console.log(posibleItem)
                 if(posibleItem) continue;
@@ -31,6 +29,51 @@ console.log("button Pressed!")
         } catch (error) {
             console.log(error)
         }
+
+        document.querySelectorAll(".settingsOption").forEach(item => {
+            if (!(item.childElementCount > 2)) {
+                textBox = document.createElement("h3")
+                textBox.classList.toggle("text1")
+                textBox.textContent = (`amount of ${item.id} tasks:`)
+                amount = document.createElement("h3")
+                amount.classList.toggle("text1")
+                amount.classList.toggle("taskAmount")
+                span = document.createElement("span")
+                span.classList.toggle("taskSpan")
+                span.appendChild(amount)
+                //console.log(item.id)
+                
+                item.insertBefore(textBox, item.children[0])
+                item.insertBefore(span, item.children[2])
+
+                amount.textContent = (response["current"][item.id])
+                //refresh  when it already exists?
+            }
+            else {
+
+            }
+        })
+        document.querySelectorAll(".arrowIcon").forEach(item => {
+            item.addEventListener("click", () => {
+                if (item.classList.length > 1) {
+                    const sibeling = Number(item.nextElementSibling.childNodes[0].textContent)
+                    if (sibeling > 0){
+                        item.nextElementSibling.childNodes[0].textContent = sibeling -1
+                    }
+                    //do something to alarm that nothing bellow 0 is avalible?
+                }
+                else{
+                    const sibeling = Number(item.previousSibling.childNodes[0].textContent)
+                    if (sibeling < response["max"][item.parentElement.id]) {
+                        item.previousSibling.childNodes[0].textContent = sibeling +1
+                    }
+                    //notify that no more tasks exist?
+                }
+        
+        
+                //console.log(item.parentElement.id)
+            })
+        })
     } else {
         changePreferences()
     }
@@ -41,23 +84,15 @@ console.log("button Pressed!")
     startBtn.classList.toggle("hide")
 }
 async function changePreferences() {
-    let apicall = {}
+    let apicall = {enabled: {}, current: {}}
 
     document.querySelectorAll(".enableOption input").forEach(item => {
-        apicall[item.id] = item.checked
+        apicall["enabled"][item.id] = item.checked
+    })
+    document.querySelectorAll(".taskAmount").forEach(item => {
+        apicall["current"][item.parentNode.parentNode.id] = Number(item.textContent)
     })
 
-    //const response = sendAPI()
-    // for (const item of await response) {
-    //     const posibleItem = document.getElementById(item.name)
-    //     if (!posibleItem) {
-    //         apicall[item.name] = item.enabled ? item.enabled : false
-    //         continue
-    //     }
-    //     else {
-    //         apicall[item.name] = posibleItem.checked
-    //     }
-    // }
     const optionsSet = await fetch("/host/set-options", {
         method: "POST",
         headers: {

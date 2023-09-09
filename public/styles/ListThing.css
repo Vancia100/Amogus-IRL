@@ -107,8 +107,28 @@
   font-size: 4vh;
 }
 .arrowIcon{
-    height: 7vh;
-    padding: 14px;
-    transform: scaleX(-1);
+    height: 8.5vh;
+    padding: 17px;
+
     cursor: pointer;
+}
+
+.mirrored{
+    transform: scaleX(-1);
+}
+
+.taskSpan {
+    display: flex;
+    width: 5vw;
+    text-align: center;
+    justify-content: center;
+    height: 8vh;
+    border:5px solid rgba(72, 75, 86, 0.81);
+    border-radius: 8px;
+    background-color: rgba(75, 73, 73, 0.332);
+    align-items: center;
+}
+
+.taskSpan h3{
+line-height: 0;
 }
