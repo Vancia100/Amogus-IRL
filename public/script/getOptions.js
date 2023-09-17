@@ -46,8 +46,10 @@ async function requestOptions () {
                 item.insertBefore(textBox, item.children[0])
                 item.insertBefore(span, item.children[2])
 
-                amount.textContent = (response["current"][item.id])
+                amount.textContent = (response["current"][item.id] || 0)
                 //refresh  when it already exists?
+
+                //make it so that you can't have more tasks of each type then settings enabled.
             }
             else {
 

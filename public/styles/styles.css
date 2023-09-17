@@ -18,6 +18,9 @@ body{
   align-items: center;
   justify-content: flex-end;
   }
+.buttonContainer a {
+  text-decoration: none;
+}
 .box{
   height: 10vh;
   margin-top: 0;
