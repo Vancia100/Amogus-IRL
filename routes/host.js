@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router() 
 const fs = require("fs")
 const bodyParser = require('body-parser');
-
+const readTasks = require("../code_tools/read_all_files")
 
 router.use(bodyParser.json())
 const directory = (__dirname + "\\..\\tasks\\")
@@ -45,11 +45,9 @@ router.get("/get-QR", (req, res) => {
     const PDFKit = require('pdfkit')
     const doc = new PDFKit({autoFirstPage:false, size:"A4"})
     const {taskList, amounts, taskEnableJson} = readTasks(directory)
-    //the values are saved in memory, making this return old data. Solve how?
     console.log(taskEnableJson.current)
     
     if (taskEnableJson.current.long >= 1 || taskEnableJson.current.short >= 1 || taskEnableJson.current.normal >= 1) {
-    //make basic chacks to make sure that settings are valid
     
     let longTask = []
     let shortTask = []
@@ -74,7 +72,7 @@ router.get("/get-QR", (req, res) => {
     randomTask(taskEnableJson.current.short, shortTask)
     randomTask(taskEnableJson.current.normal ,normalTask)
 
-    function randomTask(amount, tasks) {
+    async function randomTask(amount, tasks) {
         for (let i = 0; i < amount; i++) {
             //console.log(`iteration number ${i} of ${amount}`, tasks.length)
             if (tasks.length == 0) {
@@ -85,7 +83,10 @@ router.get("/get-QR", (req, res) => {
             tasks.splice(index, 1)
             doc.addPage()
             doc.text(`This page will be the QR-Code to "${task.name}"`)
-            //add in QR-Code
+
+
+
+            doc.image(somethingQR, 50, 50, { width: 200, height: 200 })
         }
     }
 
@@ -106,51 +107,5 @@ router.get("/get-QR", (req, res) => {
 router.get("/game", (req, res) => {
     res.render("game")
 })
-
-function readTasks(directory) {
-    try {
-        const taskEnableJsonRaw = (fs.readFileSync(directory + "taskSettings.json", {
-            encoding: "utf-8", flag: "r"
-        }))
-            var taskEnableJson = JSON.parse(taskEnableJsonRaw)
-        } catch (error) {
-            var taskEnableJson = {}
-        }
-
-    const taskdirectory = fs.readdirSync(directory).filter( (thing) => {
-        return(fs.statSync(`${directory}/${thing}`).isDirectory());
-    })
-    let taskList = []
-    var long = 0
-    var short = 0
-    var normal = 0
-
-    for (let task of taskdirectory) {
-        const taskDir = fs.readdirSync(directory + task).filter((thing) => thing.endsWith(".js"))[0]
-        const {options} = require(directory + task + "\\" + taskDir)
-        const taskEnabled = taskEnableJson["enabled"] && taskEnableJson["enabled"][options.name]? taskEnableJson["enabled"][options.name] : false
-        
-        switch (options.type) {
-            case "long":
-                long++
-                break;
-            case "short":
-                short++
-                break;
-            case "normal":
-                normal++
-                break
-            default:
-                break;
-        }
-        taskList.push({"enabled":taskEnabled, ...options}) 
-    }
-    const amounts = {
-        "long": long,
-        "short": short,
-        "normal": normal
-    }
-    return {taskList, amounts, taskEnableJson}
-}
 
 module.exports = router

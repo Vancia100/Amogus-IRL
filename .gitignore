@@ -1,3 +1,4 @@
 /node_modules
 /.env
 /tasks/taskSettings.json
+/tasks/qr-codes.json
