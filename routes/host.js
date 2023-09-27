@@ -16,7 +16,7 @@ router.get("/get-options", (req, res) =>{
         //console.log(taskEnableJson)
 
         const {taskList, amounts, taskEnableJson} = readTasks(directory)
-        console.log(taskList)
+        //console.log(taskList)
         const response = {
             "list": taskList,
             "max": {"short":amounts.short, "long": amounts.long, "normal": amounts.normal},
@@ -45,7 +45,9 @@ router.get("/get-QR", (req, res) => {
     const PDFKit = require('pdfkit')
     const doc = new PDFKit({autoFirstPage:false, size:"A4"})
     const {taskList, amounts, taskEnableJson} = readTasks(directory)
-    console.log(taskEnableJson.current)
+    const {readQr} = require("../code_tools/qrGenerator")
+
+    //console.log(taskEnableJson.current)
     
     if (taskEnableJson.current.long >= 1 || taskEnableJson.current.short >= 1 || taskEnableJson.current.normal >= 1) {
     
@@ -66,13 +68,13 @@ router.get("/get-QR", (req, res) => {
                 longTask.push(item)
         }
     })
-
+    const QrCodes = readQr()
 
     randomTask(taskEnableJson.current.long, longTask)
     randomTask(taskEnableJson.current.short, shortTask)
     randomTask(taskEnableJson.current.normal ,normalTask)
 
-    async function randomTask(amount, tasks) {
+    function randomTask(amount, tasks) {
         for (let i = 0; i < amount; i++) {
             //console.log(`iteration number ${i} of ${amount}`, tasks.length)
             if (tasks.length == 0) {
@@ -83,10 +85,7 @@ router.get("/get-QR", (req, res) => {
             tasks.splice(index, 1)
             doc.addPage()
             doc.text(`This page will be the QR-Code to "${task.name}"`)
-
-
-
-            doc.image(somethingQR, 50, 50, { width: 200, height: 200 })
+            doc.image(QrCodes[task.name], {width: 400, height: 400})
         }
     }
 

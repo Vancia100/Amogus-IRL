@@ -1,26 +1,24 @@
 const fs = require("fs")
 const readTasks = require("./read_all_files")
 const directory = (__dirname + "/../tasks/qr-codes.json")
-const directoryTasks = (__dirname + "\\..\\tasks\\")
 const qrCode = require("qrcode")
-const { url } = require("inspector")
+const { name } = require("ejs")
 
-function readValues() {
 
-}
-
-async function generateNew () {
-    const {taskList} = readTasks(directoryTasks)
+async function generateNew (redo = false) {
+    const {taskList} = readTasks()
     const jsonData = readQrSettings()
     var newTasksQr = {}
     for (const task of taskList) {
-        if (jsonData[task.name]) {
+        if (jsonData[task.name] && !redo) {
             continue
         }
-        const url = await qrCode.toDataURL(`/${task.name}`, {errorCorrectionLevel: "H"},)
+        const url = await qrCode.toDataURL(`/${String(task.name).replaceAll(" ", "-")}`, {errorCorrectionLevel: "H"},)
         newTasksQr[task.name] = url
     }
-    readQrSettings ({...newTasksQr, ...jsonData})
+    wrightTasks =!redo ? {...newTasksQr, ...jsonData} : newTasksQr
+    //console.log(wrightTasks)
+    readQrSettings (wrightTasks)
     }
 
 function readQrSettings (wright = null) {
@@ -35,13 +33,20 @@ function readQrSettings (wright = null) {
         const jsonData = JSON.parse(fs.readFileSync(directory))
         return jsonData
         } catch (error) {
-            //make callback to be able to handle async in future?
             console.log(error)
             return {}
         }
     }
 }
 
-module.exports = {readValues, generateNew}
+function readQr (){
+    //make more fancy? Perhaps a request for the specific tasks to use less memory?
+    //reload atomaticly when information doesn't have the right data?
+    const data = JSON.parse(fs.readFileSync(directory))
+    //console.log(data)
+    return data
+}
 
-generator.generateNew()
+module.exports = {generateNew, readQr}
+
+generateNew()

@@ -1,6 +1,7 @@
 const fs = require("fs")
+const { options } = require("pdfkit")
 
-function readTasks(directory) {
+function readTasks(directory = __dirname + "\\..\\tasks\\") {
     try {
         const taskEnableJsonRaw = (fs.readFileSync(directory + "taskSettings.json", {
             encoding: "utf-8", flag: "r"
@@ -20,7 +21,7 @@ function readTasks(directory) {
 
     for (let task of taskdirectory) {
         const taskDir = fs.readdirSync(directory + task).filter((thing) => thing.endsWith(".js"))[0]
-        const {options} = require(directory + task + "\\" + taskDir)
+        const {...options} = require(directory + task + "\\" + taskDir)
         const taskEnabled = taskEnableJson["enabled"] && taskEnableJson["enabled"][options.name]? taskEnableJson["enabled"][options.name] : false
         
         switch (options.type) {
@@ -36,7 +37,7 @@ function readTasks(directory) {
             default:
                 break;
         }
-        taskList.push({"enabled":taskEnabled, ...options}) 
+        taskList.push({"enabled":taskEnabled, ...(options.options),})
     }
     const amounts = {
         "long": long,
@@ -47,3 +48,4 @@ function readTasks(directory) {
 }
 
 module.exports = readTasks
+console.log(readTasks())
