@@ -16,7 +16,6 @@ router.get("/get-options", (req, res) =>{
         //console.log(taskEnableJson)
 
         const {taskList, amounts, taskEnableJson} = readTasks(directory)
-        //console.log(taskList)
         const response = {
             "list": taskList,
             "max": {"short":amounts.short, "long": amounts.long, "normal": amounts.normal},
@@ -76,7 +75,6 @@ router.get("/get-QR", (req, res) => {
 
     function randomTask(amount, tasks) {
         for (let i = 0; i < amount; i++) {
-            //console.log(`iteration number ${i} of ${amount}`, tasks.length)
             if (tasks.length == 0) {
                 break
             }
