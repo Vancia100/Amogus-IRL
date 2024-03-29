@@ -49,43 +49,15 @@ router.get("/get-QR", (req, res) => {
     //console.log(taskEnableJson.current)
     
     if (taskEnableJson.current.long >= 1 || taskEnableJson.current.short >= 1 || taskEnableJson.current.normal >= 1) {
-    
-    let longTask = []
-    let shortTask = []
-    let normalTask = []
+
+    const QrCodes = readQr()
     taskList.filter(item => {
         return item.enabled
     }).forEach(item => {
-        switch (item.type){
-            case ("normal"):
-                normalTask.push(item)
-                break
-            case ("short"):
-                shortTask.push(item)
-                break
-            case ("long"):
-                longTask.push(item)
-        }
+        doc.addPage()
+        doc.text(`This page will be the QR-Code to "${item.name}"`)
+        doc.image(QrCodes[item.name], {width: 400, height: 400})
     })
-    const QrCodes = readQr()
-
-    randomTask(taskEnableJson.current.long, longTask)
-    randomTask(taskEnableJson.current.short, shortTask)
-    randomTask(taskEnableJson.current.normal ,normalTask)
-
-    function randomTask(amount, tasks) {
-        for (let i = 0; i < amount; i++) {
-            if (tasks.length == 0) {
-                break
-            }
-            const index = Math.floor(Math.random() * tasks.length)
-            const task = tasks[index]
-            tasks.splice(index, 1)
-            doc.addPage()
-            doc.text(`This page will be the QR-Code to "${task.name}"`)
-            doc.image(QrCodes[task.name], {width: 400, height: 400})
-        }
-    }
 
     doc.pipe(res)
     doc.end()

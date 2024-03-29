@@ -1,0 +1,24 @@
+.player{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25vw;
+    height: 8vh;
+    padding: 10px;
+    background-color: rgb(21, 20, 20);
+    border-radius: 12px;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+    border: 3px solid rgb(51, 38, 38);
+}
+
+.container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+h2 {
+    color: rgb(235, 223, 223);
+    font-size: 15vh;
+}

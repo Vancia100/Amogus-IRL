@@ -76,8 +76,23 @@ async function requestOptions () {
                 //console.log(item.parentElement.id)
             })
         })
+
+
+        document.querySelectorAll("input checkbox").forEach(item => {
+            item.addEventListener("click", () => {
+                if (!item.enabled) {
+                    const isLoaded = loadPreferences()
+                    console.log(isLoaded)
+                }
+            })
+        })
+        /*
+        
+        */
     } else {
         changePreferences()
+        downloadBtn = document.getElementById("downloadBtn")
+        downloadBtn.childNodes[1].style.borderColor = "#ffffff"
     }
     const qrBtn = document.getElementById("qrBtn")
     const startBtn = document.getElementById("startBtn")
@@ -85,28 +100,34 @@ async function requestOptions () {
     settingsList.classList.toggle("show")
     startBtn.classList.toggle("hide")
 }
-async function changePreferences() {
+
+function loadPreferences(){
     let apicall = {enabled: {}, current: {}}
 
     document.querySelectorAll(".enableOption input").forEach(item => {
+        //console.log(item)
         apicall["enabled"][item.id] = item.checked
     })
     document.querySelectorAll(".taskAmount").forEach(item => {
         apicall["current"][item.parentNode.parentNode.id] = Number(item.textContent)
     })
-
-    const optionsSet = await fetch("/host/set-options", {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apicall)
+    //console.log(apicall)
+    return(apicall)
+}
+async function changePreferences() {
+    checkIfGameReady(async (apicall) =>{
+        const optionsSet = await fetch("/host/set-options", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(apicall)
+        })
+        if (!optionsSet.ok)  {
+            console.error("something went wrong when sending your prefrences...")
+            return
+        }
     })
-    if (!optionsSet.ok)  {
-        console.error("something went wrong when sending your prefrences...")
-        return
-    }
-    //console.log(await optionsSet.json)
 }
 
 async function sendAPI() {
@@ -123,4 +144,30 @@ async function sendAPI() {
 
 window.addEventListener("beforeunload", (event) => {
     changePreferences()
-} )
+})
+downloadBtn = document.getElementById("downloadBtn")
+downloadBtn.addEventListener("click", (event) =>{
+    //console.log(checkIfGameReady())
+    if(!checkIfGameReady()) {
+            event.preventDefault()
+            downloadBtn.childNodes[1].style.borderColor = "#b53933"
+            //alert("Invalid Settigns!")
+        }
+})
+
+//change structure of the API to make sure this works properly?
+function checkIfGameReady(cb, fail) {
+ const prefrences = loadPreferences()
+for (const key in prefrences.enabled) {
+    if (prefrences.enabled[key]) {
+        if (cb) cb(prefrences);
+        return true
+    }
+}
+if (fail) fail();
+return false
+}
+
+function playGame() {
+    if (checkIfGameReady()) window.location.href = "/host/game"
+}
