@@ -54,6 +54,22 @@
         var usernameInput = document.getElementById("nameInput").value
         checkUsername(usernameInput, (username) => {
             console.log(username.toUpperCase())
+            fetch("/play/checkGame").then((response) =>{
+                if (!response.ok) {
+                    throw new Error("Issues checking gamestate")
+                    window.alert("Issue with checking state of game")
+                }
+                return response.json()
+            }).then(data => {
+                if (!data) {
+                    window.alert("No game currently running!")
+                    console.log("Data sent". data)
+                } else{
+                    localStorage.setItem("username", username.toLowerCase())
+                    console.log(localStorage.getItem("username"))
+                    window.location = "/play/"
+                }
+            })
         })
     }
     </script>

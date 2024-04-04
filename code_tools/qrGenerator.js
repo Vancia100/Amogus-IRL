@@ -2,8 +2,6 @@ const fs = require("fs")
 const readTasks = require("./read_all_files")
 const directory = (__dirname + "/../tasks/qr-codes.json")
 const qrCode = require("qrcode")
-const { name } = require("ejs")
-
 
 async function generateNew (redo = false) {
     const {taskList} = readTasks()
