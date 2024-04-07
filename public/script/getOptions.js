@@ -1,16 +1,14 @@
-async function requestOptions () {
-//console.log("button Pressed!")
+const calledAPI = sendAPI()
 
-    const settingsList = document.getElementById("settingsMenue")
-    if(!settingsList.classList.contains("show")) {
-        const response = await sendAPI()
+window.addEventListener("beforeunload", () => {
+    changePreferences()
+})
+
+document.addEventListener("DOMContentLoaded", async () =>{
+        const response = await calledAPI
         const ul = document.getElementById("settingslist")
         try {
             for (const item of response.list) {
-                const posibleItem = document.getElementById(item.name)
-                //console.log(posibleItem)
-                if(posibleItem) continue;
-
                 const li = document.createElement("li")
                 optionsDiv = document.createElement("div")
                 checkbox = document.createElement("input")
@@ -29,7 +27,6 @@ async function requestOptions () {
         } catch (error) {
             console.log(error)
         }
-
         document.querySelectorAll(".settingsOption").forEach(item => {
             if (!(item.childElementCount > 2)) {
                 textBox = document.createElement("h3")
@@ -51,9 +48,6 @@ async function requestOptions () {
 
                 //make it so that you can't have more tasks of each type then settings enabled.
             }
-            else {
-
-            }
         })
         document.querySelectorAll(".arrowIcon").forEach(item => {
             item.addEventListener("click", () => {
@@ -71,28 +65,15 @@ async function requestOptions () {
                     }
                     //notify that no more tasks exist?
                 }
-        
-        
-                //console.log(item.parentElement.id)
             })
         })
+})
 
 
-        document.querySelectorAll("input checkbox").forEach(item => {
-            item.addEventListener("click", () => {
-                if (!item.enabled) {
-                    const isLoaded = loadPreferences()
-                    console.log(isLoaded)
-                }
-            })
-        })
-        /*
-        
-        */
-    } else {
+async function requestOptions() {
+    const settingsList = document.getElementById("settingsMenue")
+    if(settingsList.classList.contains("show")) {
         changePreferences()
-        downloadBtn = document.getElementById("downloadBtn")
-        downloadBtn.childNodes[1].style.borderColor = "#ffffff"
     }
     const qrBtn = document.getElementById("qrBtn")
     const startBtn = document.getElementById("startBtn")
@@ -114,8 +95,10 @@ function loadPreferences(){
     //console.log(apicall)
     return(apicall)
 }
+
 async function changePreferences() {
     checkIfGameReady(async (apicall) =>{
+        const downloadBtn = document.getElementById("downloadBtn")
         const optionsSet = await fetch("/host/set-options", {
             method: "POST",
             headers: {
@@ -127,6 +110,10 @@ async function changePreferences() {
             console.error("something went wrong when sending your prefrences...")
             return
         }
+        downloadBtn.childNodes[1].style.borderColor = "#ffffff"
+    }, () =>{
+        console.log("Wrongly entered settings!")
+        downloadBtn.childNodes[1].style.borderColor = "#b53933"
     })
 }
 
@@ -141,17 +128,13 @@ async function sendAPI() {
         console.log(error)
     }
 }
-
-window.addEventListener("beforeunload", (event) => {
-    changePreferences()
-})
 downloadBtn = document.getElementById("downloadBtn")
 downloadBtn.addEventListener("click", (event) =>{
     //console.log(checkIfGameReady())
     if(!checkIfGameReady()) {
             event.preventDefault()
             downloadBtn.childNodes[1].style.borderColor = "#b53933"
-            //alert("Invalid Settigns!")
+            //window.alert("Invalid Settigns!")
         }
 })
 
@@ -169,5 +152,6 @@ return false
 }
 
 function playGame() {
+    console.log("Tried hosting game", checkIfGameReady())
     if (checkIfGameReady()) window.location.href = "/host/game"
 }
