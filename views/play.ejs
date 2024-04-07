@@ -1,1 +1,27 @@
-Nothing here...
+<div class = box>
+    <h1>GAyming time</h1>
+</div>
+
+<script>
+playerData = {
+event: "join",
+username: localStorage.getItem("username")
+}
+document.addEventListener("DOMContentLoaded", () => {
+    const socket = new WebSocket("ws://localhost:3001/play")
+    socket.addEventListener("open", () =>{
+        console.log("Started socket!")
+        socket.send(JSON.stringify(playerData))
+    })
+    socket.addEventListener("message", (message) =>{
+        console.log(message)
+    })
+
+    socket.addEventListener("error", (error) => {
+        console.error("WebSocket error:", error)
+    })
+    socket.addEventListener("close", () =>{
+        window.location = "/"
+    })
+})
+</script>

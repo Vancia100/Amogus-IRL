@@ -8,29 +8,61 @@ wss = new WebSocket.Server( {port:3001} )
 
 let gameStarted = false
 let hostClient = null
+const players = new Map()
 wss.on('connection', (ws) => {
     console.log('WebSocket client connected')
-  
     ws.on('message', (message) => {
       ms = JSON.parse(message)
       console.log('Received message from client:', ms)
       if (ms.client == "HOST") {
-        gameStarted = true
-        hostClient = ws
-        console.log("GAME STARTED!", ms)
+        if (!gameStarted){
+          gameStarted = true
+          hostClient = ws
+          ws.playerId = 0
+          console.log("GAME STARTED!", ms)
+        }else{
+          switch (ms.action) {
+            case "kick":
+              players.get(ms.player).close()
+              break;
+            default:
+              ws.close()
+          }
+        }
       }
-      else {
-        if (!gameStarted) {
-            ws.send(JSON.stringify({game: false, status:"Game is currently offline!"}))
-        }else {
-            ws.send(JSON.stringify({game: true, status:"Hell yeah"}))
-            hostClient.send(message)
+      else if (gameStarted) {
+        switch (ms.event){
+          case "join":
+            if (players.has(ms.username)) {
+              console.log("username is already in use!")
+              ws.send(JSON.stringify({error:"usrName"}))
+              break
+            }
+            console.log("Sent massage to host")
+            players.set(ms.username, ws)
+            ws.playerId = ms.username
+            hostClient.send(JSON.stringify(ms))
+            break
+          default:
+            console.log(ms)
         }
       } 
     })
-  
     ws.on('close', () => {
       console.log('WebSocket client disconnected')
+      if (ws.playerId === 0) {
+        console.log("The host quit!")
+        wss.clients.forEach(element => {
+          element.close()
+        })
+        players.clear()
+        gameStarted = false
+        hostClient = null
+      }
+      else {
+        players.delete(ws.playerId)
+          if (hostClient && ws.playerId) hostClient.send(JSON.stringify({event: "kick", player:ws.playerId}))
+      }
     })
   })
 
@@ -41,15 +73,5 @@ router.get("/", (req, res) => {
 router.get("/checkGame", (req, res) => {
   res.send(JSON.stringify(gameStarted))
 })
-
-// router.get('//:id', function(req , res){
-// // const loadFiles = require("../code_tools/read_all_files")
-//     // const {taskList} = loadFiles()
-//     // if (taskList.forEach(item => {
-//     //     return item.options.name == (String(req.params.id).replaceAll("-", " "))
-//     // })) {
-//     //     console.log("That task exists.")
-//     // }
-//   });
 
 module.exports = router
