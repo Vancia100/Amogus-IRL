@@ -23,7 +23,6 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
         const {...taskOptions} = require(directory + task + "\\" + taskDir)
         const options = taskOptions.options
         const taskEnabled = taskEnableJson["enabled"] && taskEnableJson["enabled"][options.name]? taskEnableJson["enabled"][options.name] : false
-        console.log(options)
         switch (options.type) {
             case "long":
                 long++
@@ -46,6 +45,5 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
     }
     return {taskList, amounts, taskEnableJson}
 }
-
 module.exports = readTasks
-console.log(readTasks())
+//console.log(readTasks())

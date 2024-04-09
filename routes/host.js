@@ -3,11 +3,13 @@ const router = express.Router()
 const fs = require("fs")
 const bodyParser = require('body-parser');
 const readTasks = require("../code_tools/read_all_files")
+const directory = (__dirname + "\\..\\tasks\\")
+const {taskList, amounts, taskEnableJson} = readTasks(directory)
 
 router.use(bodyParser.json())
-const directory = (__dirname + "\\..\\tasks\\")
+
 router.get("/", (req, res) => {
-    res.render("host")
+    res.render("host", {taskEnableJson})
 })
 
 router.get("/get-options", (req, res) =>{
@@ -15,7 +17,6 @@ router.get("/get-options", (req, res) =>{
     try {
         //console.log(taskEnableJson)
 
-        const {taskList, amounts, taskEnableJson} = readTasks(directory)
         const response = {
             "list": taskList,
             "max": {"short":amounts.short, "long": amounts.long, "normal": amounts.normal},
@@ -27,6 +28,7 @@ router.get("/get-options", (req, res) =>{
         res.status(500).json({"error":error})
         console.log(error)
     }
+    
 })
 
 router.post("/set-options", (req, res) =>{
@@ -70,7 +72,6 @@ router.get("/get-QR", (req, res) => {
         doc.end()
         //res.status(400).json({error: "Must have at least one task!"})
     }
-
 })
 
 router.get("/game", (req, res) => {

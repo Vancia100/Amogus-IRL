@@ -6,64 +6,17 @@ window.addEventListener("beforeunload", () => {
 
 document.addEventListener("DOMContentLoaded", async () =>{
         const response = await calledAPI
-        const ul = document.getElementById("settingslist")
-        try {
-            for (const item of response.list) {
-                const li = document.createElement("li")
-                optionsDiv = document.createElement("div")
-                checkbox = document.createElement("input")
-                checkbox.setAttribute("type", "checkbox")
-                checkbox.setAttribute("id", item.name)
-                checkbox.checked  = item.enabled
-                textHeader = document.createElement("h3")
-                textHeader.classList.toggle("text1")
-                textHeader.textContent = (`Enable "${item.name}"`)
-                optionsDiv.classList.toggle("enableOption")
-                optionsDiv.appendChild(textHeader)
-                optionsDiv.appendChild(checkbox)
-                li.appendChild(optionsDiv)
-                ul.appendChild(li)
-            }
-        } catch (error) {
-            console.log(error)
-        }
-        document.querySelectorAll(".settingsOption").forEach(item => {
-            if (!(item.childElementCount > 2)) {
-                textBox = document.createElement("h3")
-                textBox.classList.toggle("text1")
-                textBox.textContent = (`amount of ${item.id} tasks:`)
-                amount = document.createElement("h3")
-                amount.classList.toggle("text1")
-                amount.classList.toggle("taskAmount")
-                span = document.createElement("span")
-                span.classList.toggle("taskSpan")
-                span.appendChild(amount)
-                //console.log(item.id)
-                
-                item.insertBefore(textBox, item.children[0])
-                item.insertBefore(span, item.children[2])
-
-                amount.textContent = (response["current"][item.id] || 0)
-                //refresh  when it already exists?
-
-                //make it so that you can't have more tasks of each type then settings enabled.
-            }
-        })
+        
         document.querySelectorAll(".arrowIcon").forEach(item => {
-            item.addEventListener("click", () => {
-                if (item.classList.length > 1) {
-                    const sibeling = Number(item.nextElementSibling.childNodes[0].textContent)
-                    if (sibeling > 0){
-                        item.nextElementSibling.childNodes[0].textContent = sibeling -1
-                    }
-                    //do something to alarm that nothing bellow 0 is avalible?
-                }
-                else{
-                    const sibeling = Number(item.previousSibling.childNodes[0].textContent)
-                    if (sibeling < response["max"][item.parentElement.id]) {
-                        item.previousSibling.childNodes[0].textContent = sibeling +1
-                    }
-                    //notify that no more tasks exist?
+            item.addEventListener("click", (event) => {
+                if(event.target.classList.contains("mirrored")) {
+                    const amount = Number(event.target.nextElementSibling.childNodes[1].textContent)
+                    event.target.nextElementSibling.childNodes[1].textContent = (amount == 0 ? 0 : amount - 1)
+                }else {
+                    const amount = Number(event.target.previousElementSibling.childNodes[1].textContent)
+                    const parentID = event.target.parentNode.id
+                    event.target.previousElementSibling.childNodes[1].textContent = (amount <response["max"][parentID] ? amount + 1 : amount)
+                    console.log(parentID)
                 }
             })
         })

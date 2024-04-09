@@ -22,27 +22,27 @@
     
     <div class="settingsMenue" id="settingsMenue">
         <ul id="settingslist">
-            <li>
-                <div class="settingsOption" id="short">
-                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon mirrored">
-                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon">
-                </div>
-            </li>
-            <li>
-                <div class="settingsOption" id="normal">
-                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon mirrored">
-
-                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon">
-                </div>
-            </li>
-            <li>
-                <div class="settingsOption" id="long">
-                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon mirrored">
-
-                    <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon">
-                </div>
-            </li>
+            <% for (const item in taskEnableJson.current) {%>
+                <li>
+                    <div class="settingsOption" id="<%=item%>">
+                        <h3 class="text1">amount of <%=item%> tasks: </h3>
+                        <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon mirrored">
+                        <span class="taskSpan">
+                        <h3 class="text1 taskAmount"> <%=taskEnableJson.current[item] ? taskEnableJson.current[item] : "0"%> </h3>
+                        </span>
+                        <img src="pictures/arrow.svg" alt="icon of a arrow" class="arrowIcon">
+                    </div>
+                </li>
+            <% } %>    
             <br>
+            <% for (const item in taskEnableJson.enabled) {%>
+                <li>
+                    <div class="enableOption">
+                        <h3 class="text1">Enable "<%=item%>"</h3>
+                            <input type="checkbox" id="<%=item%>" <%= taskEnableJson.enabled[item] ? "checked" : "" %>>
+                    </div>
+                </li>
+            <%} %>
         </ul>
     </div>
 
