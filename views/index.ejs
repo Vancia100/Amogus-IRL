@@ -25,7 +25,10 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const usernameInput = document.getElementById("usernameForm");
+        const usernameInput = document.getElementById("usernameForm")
+
+        if (localStorage.getItem("username")) usernameInput.childNodes[1].value = localStorage.getItem("username");
+
         usernameInput.addEventListener("submit", function (event) {
             event.preventDefault()
             Load()
@@ -54,18 +57,25 @@
         var usernameInput = document.getElementById("nameInput").value
         checkUsername(usernameInput, (username) => {
             console.log(username.toUpperCase())
-            fetch("/play/checkGame").then((response) =>{
+            const processedUsername = username.toLowerCase().trim()
+            fetch("/play/checkGame", {
+                method: "POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({"username":processedUsername})
+            }).then((response) =>{
                 if (!response.ok) {
                     throw new Error("Issues checking gamestate")
                     window.alert("Issue with checking state of game")
                 }
                 return response.json()
             }).then(data => {
-                if (!data) {
-                    window.alert("No game currently running!")
+                if (!(data.allowed)) {
+                    window.alert(data.message)
                     console.log("Data sent". data)
                 } else{
-                    localStorage.setItem("username", username.toLowerCase())
+                    localStorage.setItem("username", processedUsername)
                     console.log(localStorage.getItem("username"))
                     window.location = "/play/"
                 }

@@ -3,8 +3,11 @@ const router = express.Router()
 const http = require("http")
 const WebSocket = require("ws")
 const server = http.createServer(router)
+const bodyParser = require('body-parser');
 
 wss = new WebSocket.Server( {port:3001} )
+
+router.use(bodyParser.json())
 
 let gameStarted = false
 let hostClient = null
@@ -36,6 +39,7 @@ wss.on('connection', (ws) => {
             if (players.has(ms.username)) {
               console.log("username is already in use!")
               ws.send(JSON.stringify({error:"usrName"}))
+              ws.close()
               break
             }
             console.log("Sent massage to host")
@@ -70,8 +74,13 @@ router.get("/", (req, res) => {
     res.render("play")
 })
 
-router.get("/checkGame", (req, res) => {
-  res.send(JSON.stringify(gameStarted))
+router.post("/checkGame", (req, res) => {
+  const inputUsername = req.body
+  console.log(players.has(inputUsername.username), inputUsername.username)
+  res.send(JSON.stringify({
+    allowed: gameStarted && !(players.has(inputUsername.username) ) && false,
+    message: !gameStarted ? players.has(inputUsername.username) ? "" : "Game not started" : "Username already in use"
+  }))
 })
 
 module.exports = router
