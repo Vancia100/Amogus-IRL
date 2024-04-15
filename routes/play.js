@@ -78,7 +78,7 @@ router.post("/checkGame", (req, res) => {
   const inputUsername = req.body
   console.log(players.has(inputUsername.username), inputUsername.username)
   res.send(JSON.stringify({
-    allowed: gameStarted && !(players.has(inputUsername.username) ) && false,
+    allowed: gameStarted && !(players.has(inputUsername.username)),
     message: !gameStarted ? players.has(inputUsername.username) ? "" : "Game not started" : "Username already in use"
   }))
 })
