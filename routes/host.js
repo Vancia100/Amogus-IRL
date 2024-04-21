@@ -19,7 +19,7 @@ router.get("/get-options", (req, res) =>{
 
         const response = {
             "list": taskList,
-            "max": {"short":amounts.short, "long": amounts.long, "normal": amounts.normal},
+            "max": {"short":amounts.short.length, "long": amounts.long.length, "normal": amounts.normal.length},
             "current": taskEnableJson["current"] ? taskEnableJson["current"] : {"short": 0, "long": 0, "normal": 0,}
             }
         res.json(response)
@@ -45,7 +45,6 @@ router.post("/set-options", (req, res) =>{
 router.get("/get-QR", (req, res) => {
     const PDFKit = require('pdfkit')
     const doc = new PDFKit({autoFirstPage:false, size:"A4"})
-    const {taskList, amounts, taskEnableJson} = readTasks(directory)
     const {readQr} = require("../code_tools/qrGenerator")
 
     //console.log(taskEnableJson.current)
