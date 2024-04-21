@@ -4,36 +4,46 @@ const http = require("http")
 const WebSocket = require("ws")
 const server = http.createServer(router)
 const bodyParser = require('body-parser');
+const { start } = require("repl")
 
 wss = new WebSocket.Server( {port:3001} )
 
 router.use(bodyParser.json())
 
+let gameJoinable = false
 let gameStarted = false
 let hostClient = null
 const players = new Map()
 wss.on('connection', (ws) => {
     console.log('WebSocket client connected')
+
     ws.on('message', (message) => {
       ms = JSON.parse(message)
       console.log('Received message from client:', ms)
       if (ms.client == "HOST") {
-        if (!gameStarted){
-          gameStarted = true
+        if (hostClient != null){
+          gameJoinable = true
           hostClient = ws
           ws.playerId = 0
           console.log("GAME STARTED!", ms)
         }else{
           switch (ms.action) {
             case "kick":
-              players.get(ms.player).close()
+              console.log(ms.player)
+              const player = players.get(ms.player)
+                player.close()
               break;
+            case "start":
+              console.log("Game should have started")
+              gameStarted = true
+              gameJoinable = false
+              randomTasks()
             default:
               ws.close()
           }
         }
       }
-      else if (gameStarted) {
+      else if (hostClient) {
         switch (ms.event){
           case "join":
             if (players.has(ms.username)) {
@@ -45,6 +55,7 @@ wss.on('connection', (ws) => {
             console.log("Sent massage to host")
             players.set(ms.username, ws)
             ws.playerId = ms.username
+            ws.alive = true
             hostClient.send(JSON.stringify(ms))
             break
           default:
@@ -52,6 +63,7 @@ wss.on('connection', (ws) => {
         }
       } 
     })
+
     ws.on('close', () => {
       console.log('WebSocket client disconnected')
       if (ws.playerId === 0) {
@@ -60,15 +72,17 @@ wss.on('connection', (ws) => {
           element.close()
         })
         players.clear()
+        gameJoinable = false
         gameStarted = false
         hostClient = null
       }
       else {
         players.delete(ws.playerId)
           if (hostClient && ws.playerId) hostClient.send(JSON.stringify({event: "kick", player:ws.playerId}))
-      }
+      } //What if you could reconnect?
     })
   })
+
 
 router.get("/", (req, res) => {
     res.render("play")
@@ -76,11 +90,35 @@ router.get("/", (req, res) => {
 
 router.post("/checkGame", (req, res) => {
   const inputUsername = req.body
-  console.log(players.has(inputUsername.username), inputUsername.username)
+  //console.log(players.has(inputUsername.username), inputUsername.username)
   res.send(JSON.stringify({
-    allowed: gameStarted && !(players.has(inputUsername.username) ) && false,
-    message: !gameStarted ? players.has(inputUsername.username) ? "" : "Game not started" : "Username already in use"
+    allowed: gameJoinable && !(players.has(inputUsername.username)),
+    message: !gameJoinable ? players.has(inputUsername.username) ? "" : "Game not started" : "Username already in use"
   }))
 })
+
+
+function randomTasks() {
+  const readTasks = require("../code_tools/read_all_files")
+  const {amounts, taskEnableJson} = readTasks()
+  players.forEach(player =>{
+    const tasks = ["yourTasks"]
+    amounts.forEach(typeOfTask =>{
+      let filteredList = item.filter(task => {
+        return typeOfTask.options.enabled //??? No clue if this works
+      })
+
+      const amountOfThisTask = taskEnableJson[current][typeOfTask]
+
+      while (i <= amountOfThisTask && filteredList.length != 0, i++) {
+        //adds tasks
+      }
+    })
+    player.send(JSON.stringify({
+      "event": "start",
+      tasks
+    }))
+  })
+}
 
 module.exports = router
