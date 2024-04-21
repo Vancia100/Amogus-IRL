@@ -1,6 +1,18 @@
 <div class = box>
     <h1>GAyming time</h1>
 </div>
+<div class="box">
+    <h2>
+        See your name on the host screen?
+    </h2>
+</div>
+<br>
+<br>
+<div class="button">
+    <h2" id="myUsername" class="text1">
+
+    </h2>
+</div>
 
 <script>
 playerData = {
@@ -8,6 +20,8 @@ event: "join",
 username: localStorage.getItem("username")
 }
 document.addEventListener("DOMContentLoaded", () => {
+    const nameField = document.getElementById("myUsername")
+    nameField.textContent = playerData.username
     const socket = new WebSocket("ws://localhost:3001/play")
     socket.addEventListener("open", () =>{
         console.log("Started socket!")
