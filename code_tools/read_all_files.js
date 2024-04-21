@@ -14,9 +14,9 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
         return(fs.statSync(`${directory}/${thing}`).isDirectory());
     })
     let taskList = []
-    var long = 0
-    var short = 0
-    var normal = 0
+    let long = []
+    let short = []
+    let normal = []
 
     for (let task of taskdirectory) {
         const taskDir = fs.readdirSync(directory + task).filter((thing) => thing.endsWith(".js"))[0]
@@ -25,13 +25,13 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
         const taskEnabled = taskEnableJson["enabled"] && taskEnableJson["enabled"][options.name]? taskEnableJson["enabled"][options.name] : false
         switch (options.type) {
             case "long":
-                long++
+                long.push({"enabled":taskEnabled, ...options})
                 break;
             case "short":
-                short++
+                short.push({"enabled":taskEnabled, ...options})
                 break;
             case "normal":
-                normal++
+                normal.push({"enabled":taskEnabled, ...options})
                 break
             default:
                 break;
@@ -39,9 +39,9 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
         taskList.push({"enabled":taskEnabled, ...options})
     }
     const amounts = {
-        "long": long,
-        "short": short,
-        "normal": normal
+        long,
+        short,
+        normal,
     }
     return {taskList, amounts, taskEnableJson}
 }
