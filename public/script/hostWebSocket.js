@@ -1,3 +1,5 @@
+let playerCount = 0
+
 const socket = new WebSocket("ws://localhost:3001/play")
 
 document.addEventListener("DOMContentLoaded", () =>{
@@ -11,21 +13,33 @@ document.addEventListener("DOMContentLoaded", () =>{
         console.log(messageJSON)
         switch (messageJSON.event) {
             case "join":
+                updatePlayerCount()
                 console.log("Tied adding box")
                 const container = document.getElementById("playerContainer")
                 const playerDiv = document.createElement("div")
                 const playerText = document.createElement("h2")
+                const playerIcon = document.createElement("img")
+                const playerIconDiv = document.createElement("div")
+                const playerTextDiv = document.createElement("div")
+                playerIconDiv.classList.add("playerIconDiv")
+                playerTextDiv.classList.add("playerTextDiv")
+                playerIcon.id = `icon-${messageJSON.username}`
+                playerIcon.src = "/pictures/playericon.svg"
+                playerIcon.classList.add("playerIcon")
+                playerIcon.width = "55"
                 playerText.textContent = messageJSON.username
                 playerText.classList.add("text1")
                 playerDiv.classList.add("player")
                 playerDiv.id = messageJSON.username
-                playerDiv.appendChild(playerText)
-                playerDiv.addEventListener("click", (thisPlayerDiv) =>{
-                    console.log("tried kicking player", thisPlayerDiv.srcElement.id)
+                playerIconDiv.appendChild(playerIcon)
+                playerTextDiv.appendChild(playerText)
+                playerDiv.appendChild(playerIconDiv)
+                playerDiv.appendChild(playerTextDiv)
+                playerDiv.addEventListener("click", () =>{
                     socket.send(JSON.stringify({
                         client:"HOST",
                         action: "kick",
-                        player: thisPlayerDiv.srcElement.id ? thisPlayerDiv.srcElement.id : thisPlayerDiv.srcElement.parentNode.id,
+                        player: playerDiv.id
                     }))
                 })
                 container.appendChild(playerDiv)
@@ -35,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () =>{
                 console.log("Tried kicking player", messageJSON.player)
                 nowKickedPlayer = document.getElementById(messageJSON.player)
                 if (nowKickedPlayer) {
+                    updatePlayerCount(true)
                     nowKickedPlayer.remove()
                 }
                 break
@@ -51,9 +66,26 @@ document.addEventListener("DOMContentLoaded", () =>{
 })
 
 function startGameBtn() {
-    console.log("Tried starting game")
-    socket.send(JSON.stringify({
-        client:"HOST",
-        action: "start",
-    }))
+    console.log("Tried Starting game")
+    if(playerCount >= 4){
+        console.log("Tried starting game")
+        socket.send(JSON.stringify({
+            client:"HOST",
+            action: "start",
+        }))
+    } else{
+        console.log("Not enough players!")
+    }
+}
+
+
+function updatePlayerCount(kick = false) {
+    const playerCounterDiv = document.getElementById("playerCount")
+    if (kick) {
+        playerCount --
+    } else {
+        playerCount ++
+    }
+    playerCounterDiv.textContent = playerCount
+    //when start button is available add so that us unblurred
 }
