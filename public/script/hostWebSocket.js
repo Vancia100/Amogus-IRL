@@ -1,8 +1,8 @@
 let playerCount = 0
 
+const socket = new WebSocket("ws://localhost:3001/play")
 
 document.addEventListener("DOMContentLoaded", () =>{
-    const socket = new WebSocket("ws://localhost:3001/play")
     console.log("tried opening socket")
     socket.addEventListener("open", () =>{
         console.log("Started socket!")
@@ -61,19 +61,22 @@ document.addEventListener("DOMContentLoaded", () =>{
         console.error("WebSocket error:", error)
     })
     socket.addEventListener("close", () =>{
-        window.location = "/"
-    })
-
-    // Add envent listener for start game
-    const startBtn = document.getElementById("startBtn")
-    startBtn.addEventListener("click", () =>{
-        if(playerCount >= 4){
-            //Start Game
-        } else{
-            //Outline
-        }
+        //window.location = "/"
     })
 })
+
+function startGameBtn() {
+    console.log("Tried Starting game")
+    if(playerCount >= 4){
+        console.log("Tried starting game")
+        socket.send(JSON.stringify({
+            client:"HOST",
+            action: "start",
+        }))
+    } else{
+        console.log("Not enough players!")
+    }
+}
 
 
 function updatePlayerCount(kick = false) {
