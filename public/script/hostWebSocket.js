@@ -1,7 +1,6 @@
-
+const socket = new WebSocket("ws://localhost:3001/play")
 
 document.addEventListener("DOMContentLoaded", () =>{
-    const socket = new WebSocket("ws://localhost:3001/play")
     console.log("tried opening socket")
     socket.addEventListener("open", () =>{
         console.log("Started socket!")
@@ -47,6 +46,14 @@ document.addEventListener("DOMContentLoaded", () =>{
         console.error("WebSocket error:", error)
     })
     socket.addEventListener("close", () =>{
-        window.location = "/"
+        //window.location = "/"
     })
 })
+
+function startGameBtn() {
+    console.log("Tried starting game")
+    socket.send(JSON.stringify({
+        client:"HOST",
+        action: "start",
+    }))
+}

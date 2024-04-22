@@ -4,7 +4,6 @@ const http = require("http")
 const WebSocket = require("ws")
 const server = http.createServer(router)
 const bodyParser = require('body-parser');
-const { start } = require("repl")
 
 wss = new WebSocket.Server( {port:3001} )
 
@@ -21,7 +20,8 @@ wss.on('connection', (ws) => {
       ms = JSON.parse(message)
       console.log('Received message from client:', ms)
       if (ms.client == "HOST") {
-        if (hostClient != null){
+        console.log("Host joined!")
+        if (hostClient == null){
           gameJoinable = true
           hostClient = ws
           ws.playerId = 0
@@ -37,7 +37,8 @@ wss.on('connection', (ws) => {
               console.log("Game should have started")
               gameStarted = true
               gameJoinable = false
-              randomTasks()
+              assignRandomTasks()
+              break
             default:
               ws.close()
           }
@@ -98,22 +99,25 @@ router.post("/checkGame", (req, res) => {
 })
 
 
-function randomTasks() {
+function assignRandomTasks() {
   const readTasks = require("../code_tools/read_all_files")
   const {amounts, taskEnableJson} = readTasks()
   players.forEach(player =>{
-    const tasks = ["yourTasks"]
-    amounts.forEach(typeOfTask =>{
-      let filteredList = item.filter(task => {
-        return typeOfTask.options.enabled //??? No clue if this works
+    const tasks = []
+    console.log(amounts, taskEnableJson)
+
+    for (typeOfTask in amounts) {
+      const filteredList = amounts[typeOfTask].filter(task => {
+        return task.enabled 
       })
-
-      const amountOfThisTask = taskEnableJson[current][typeOfTask]
-
-      while (i <= amountOfThisTask && filteredList.length != 0, i++) {
-        //adds tasks
+      const amountOfThisTask = taskEnableJson["current"][typeOfTask]
+      let i = 1
+      while ( i <= amountOfThisTask && filteredList.length) {
+        i++
+        //loop works but this line bellow does not work as intended.
+        tasks.push(filteredList.splice(Math.floor(filteredList.length * Math.random()), 1)[0])
       }
-    })
+    }
     player.send(JSON.stringify({
       "event": "start",
       tasks
