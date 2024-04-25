@@ -81,11 +81,8 @@ function startGameBtn() {
 
 function updatePlayerCount(kick = false) {
     const playerCounterDiv = document.getElementById("playerCount")
-    if (kick) {
-        playerCount --
-    } else {
-        playerCount ++
-    }
+    
+    playerCount = kick ? playerCount - 1 : playerCount + 1
     playerCounterDiv.textContent = playerCount
     //when start button is available add so that us unblurred
 }

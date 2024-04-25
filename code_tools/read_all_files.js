@@ -13,7 +13,7 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
     const taskdirectory = fs.readdirSync(directory).filter( (thing) => {
         return(fs.statSync(`${directory}/${thing}`).isDirectory());
     })
-    let taskList = []
+    let taskList = {} //Could just do thease to const
     let long = []
     let short = []
     let normal = []
@@ -36,7 +36,7 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
             default:
                 break;
         }
-        taskList.push({"enabled":taskEnabled, ...options})
+        taskList[options.name] = {"enabled":taskEnabled, ...options}
     }
     const amounts = {
         long,
@@ -46,4 +46,4 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
     return {taskList, amounts, taskEnableJson}
 }
 module.exports = readTasks
-//console.log(readTasks())
+console.log(readTasks())

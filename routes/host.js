@@ -18,7 +18,7 @@ router.get("/get-options", (req, res) =>{
         //console.log(taskEnableJson)
 
         const response = {
-            "list": taskList,
+            "list": amounts,
             "max": {"short":amounts.short.length, "long": amounts.long.length, "normal": amounts.normal.length},
             "current": taskEnableJson["current"] ? taskEnableJson["current"] : {"short": 0, "long": 0, "normal": 0,}
             }
@@ -49,16 +49,16 @@ router.get("/get-QR", (req, res) => {
 
     //console.log(taskEnableJson.current)
     
-    if (taskEnableJson.current.long >= 1 || taskEnableJson.current.short >= 1 || taskEnableJson.current.normal >= 1) {
+    if (taskEnableJson.current.long + taskEnableJson.current.short + taskEnableJson.current.normal) {
 
     const QrCodes = readQr()
-    taskList.filter(item => {
-        return item.enabled
-    }).forEach(item => {
+    for (item of taskList) {
+        if (!taskList[item][enabled]) continue;
+
         doc.addPage()
-        doc.text(`This page will be the QR-Code to "${item.name}"`)
-        doc.image(QrCodes[item.name], {width: 400, height: 400})
-    })
+        doc.text(`This page will be the QR-Code to "${item}"`)
+        doc.image(QrCodes[item], {width: 400, height: 400})
+    }
 
     doc.pipe(res)
     doc.end()

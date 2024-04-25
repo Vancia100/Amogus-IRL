@@ -1,9 +1,5 @@
 const calledAPI = sendAPI()
 
-window.addEventListener("beforeunload", () => {
-    changePreferences()
-})
-
 document.addEventListener("DOMContentLoaded", async () =>{
         const response = await calledAPI
         
@@ -22,6 +18,17 @@ document.addEventListener("DOMContentLoaded", async () =>{
         })
 })
 
+window.addEventListener("beforeunload", changePreferences)
+
+
+downloadBtn = document.getElementById("downloadBtn")
+downloadBtn.addEventListener("click", (event) =>{
+    if(!checkIfGameReady()) {
+            event.preventDefault()
+            downloadBtn.childNodes[1].style.borderColor = "#b53933"
+            window.alert("Invalid Settigns!")
+        }
+})
 
 async function requestOptions() {
     const settingsList = document.getElementById("settingsMenue")
@@ -35,23 +42,8 @@ async function requestOptions() {
     startBtn.classList.toggle("hide")
 }
 
-function loadPreferences(){
-    let apicall = {enabled: {}, current: {}}
-
-    document.querySelectorAll(".enableOption input").forEach(item => {
-        //console.log(item)
-        apicall["enabled"][item.id] = item.checked
-    })
-    document.querySelectorAll(".taskAmount").forEach(item => {
-        apicall["current"][item.parentNode.parentNode.id] = Number(item.textContent)
-    })
-    //console.log(apicall)
-    return(apicall)
-}
-
 async function changePreferences() {
     checkIfGameReady(async (apicall) =>{
-        const downloadBtn = document.getElementById("downloadBtn")
         const optionsSet = await fetch("/host/set-options", {
             method: "POST",
             headers: {
@@ -81,27 +73,47 @@ async function sendAPI() {
         console.log(error)
     }
 }
-downloadBtn = document.getElementById("downloadBtn")
-downloadBtn.addEventListener("click", (event) =>{
-    //console.log(checkIfGameReady())
-    if(!checkIfGameReady()) {
-            event.preventDefault()
-            downloadBtn.childNodes[1].style.borderColor = "#b53933"
-            //window.alert("Invalid Settigns!")
-        }
-})
 
-//change structure of the API to make sure this works properly?
 function checkIfGameReady(cb, fail) {
- const prefrences = loadPreferences()
-for (const key in prefrences.enabled) {
-    if (prefrences.enabled[key]) {
-        if (cb) cb(prefrences);
-        return true
+
+    const taskAmounts = {}
+    let taskAmountsCounter = 0
+    document.querySelectorAll(".taskAmount").forEach(item => {
+        taskAmounts[item.parentNode.parentNode.id] = Number(item.textContent)
+        taskAmountsCounter = taskAmountsCounter + Number(item.textContent)
+    })
+
+    if (!taskAmountsCounter) {
+        if(fail) fail()
+        return false
     }
-}
-if (fail) fail();
-return false
+    const tasksMap = new Map()
+    document.querySelectorAll(".enableOption input").forEach(item => {
+        tasksMap.set(item.id, item.checked)
+    })
+    const filteredMap = new Map(
+        [...tasksMap]
+        .filter(([k, v]) => v)
+    )
+ calledAPI.then(value => {
+    for (taskType in value.list) {
+        if (value["list"][taskType].filter(task =>{
+            return filteredMap.has(task.name)
+        }).length < taskAmounts[taskType]){
+            if (fail) fail()
+            return false
+        }
+    }
+    if (cb) {
+        cb({
+            "enabled":Object.fromEntries(tasksMap),
+            "current":taskAmounts
+        })
+    }
+    return true
+ }).catch(reason =>{
+    console.log(reason)
+ })
 }
 
 function playGame() {
