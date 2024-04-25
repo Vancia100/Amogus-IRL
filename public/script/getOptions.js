@@ -2,7 +2,22 @@ const calledAPI = sendAPI()
 
 document.addEventListener("DOMContentLoaded", async () =>{
         const response = await calledAPI
-        
+        const maxAmounts = response.max
+        document.querySelectorAll(".enableOption input").forEach(item => {
+            const checkboxTaskType = response["lookup"][item.id]["type"]
+            if (!item.checked) maxAmounts[checkboxTaskType] --
+
+            item.addEventListener("change", () =>{
+                if (item.checked) {
+                    maxAmounts[checkboxTaskType] ++
+                    return
+                }
+                maxAmounts[checkboxTaskType] --
+                const thisCounter = document.getElementById(checkboxTaskType).childNodes[5].childNodes[1]
+                if (Number(thisCounter.textContent) > maxAmounts[checkboxTaskType]) thisCounter.textContent = maxAmounts[checkboxTaskType]
+            })
+        })
+
         document.querySelectorAll(".arrowIcon").forEach(item => {
             item.addEventListener("click", (event) => {
                 if(event.target.classList.contains("mirrored")) {
@@ -11,8 +26,7 @@ document.addEventListener("DOMContentLoaded", async () =>{
                 }else {
                     const amount = Number(event.target.previousElementSibling.childNodes[1].textContent)
                     const parentID = event.target.parentNode.id
-                    event.target.previousElementSibling.childNodes[1].textContent = (amount <response["max"][parentID] ? amount + 1 : amount)
-                    console.log(parentID)
+                    event.target.previousElementSibling.childNodes[1].textContent = (amount < maxAmounts[parentID] ? amount + 1 : amount)
                 }
             })
         })
@@ -91,19 +105,19 @@ function checkIfGameReady(cb, fail) {
     document.querySelectorAll(".enableOption input").forEach(item => {
         tasksMap.set(item.id, item.checked)
     })
-    const filteredMap = new Map(
-        [...tasksMap]
-        .filter(([k, v]) => v)
-    )
- calledAPI.then(value => {
-    for (taskType in value.list) {
-        if (value["list"][taskType].filter(task =>{
-            return filteredMap.has(task.name)
-        }).length < taskAmounts[taskType]){
-            if (fail) fail()
-            return false
+    //This is currently redundand, but I left it in place to check for errors just in case
+    calledAPI.then(value => {
+        for (taskType in value.list) {
+           if (value["list"][taskType].filter(task =>{
+               return new Map(
+                [...tasksMap]
+                .filter(([k, v]) => v)
+            ).has(task.name)
+           }).length < taskAmounts[taskType]){
+               if (fail) fail()
+               return false
+           }
         }
-    }
     if (cb) {
         cb({
             "enabled":Object.fromEntries(tasksMap),

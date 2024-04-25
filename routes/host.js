@@ -19,6 +19,7 @@ router.get("/get-options", (req, res) =>{
 
         const response = {
             "list": amounts,
+            "lookup":taskList,
             "max": {"short":amounts.short.length, "long": amounts.long.length, "normal": amounts.normal.length},
             "current": taskEnableJson["current"] ? taskEnableJson["current"] : {"short": 0, "long": 0, "normal": 0,}
             }
