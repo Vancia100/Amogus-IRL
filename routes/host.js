@@ -9,8 +9,9 @@ const {taskList, amounts, taskEnableJson} = readTasks(directory)
 router.use(bodyParser.json())
 
 router.get("/", (req, res) => {
-    res.render("host", {taskEnableJson})
+    res.render("host", {taskList, amounts, taskEnableJson})
 })
+
 
 router.get("/get-options", (req, res) =>{
 

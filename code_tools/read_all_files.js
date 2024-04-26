@@ -39,11 +39,11 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
         taskList[options.name] = {"enabled":taskEnabled, ...options}
     }
     const amounts = {
-        long,
         short,
         normal,
+        long,
     }
     return {taskList, amounts, taskEnableJson}
 }
 module.exports = readTasks
-console.log(readTasks())
+//console.log(readTasks())
