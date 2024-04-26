@@ -6,13 +6,13 @@ const qrCode = require("qrcode")
 async function generateNew (redo = false) {
     const {taskList} = readTasks()
     const jsonData = readQrSettings()
-    var newTasksQr = {}
-    for (const task of taskList) {
-        if (jsonData[task.name] && !redo) {
+    let newTasksQr = {}
+    for (const task in taskList) {
+        if (jsonData[task] && !redo) {
             continue
         }
-        const url = await qrCode.toDataURL(`/${String(task.name).replaceAll(" ", "-")}`, {errorCorrectionLevel: "H"},)
-        newTasksQr[task.name] = url
+        const url = await qrCode.toDataURL(`/${String(task).replaceAll(" ", "-")}`, {errorCorrectionLevel: "H"},)
+        newTasksQr[task] = url
     }
     wrightTasks =!redo ? {...newTasksQr, ...jsonData} : newTasksQr
     //console.log(wrightTasks)

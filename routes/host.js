@@ -4,17 +4,18 @@ const fs = require("fs")
 const bodyParser = require('body-parser');
 const readTasks = require("../code_tools/read_all_files")
 const directory = (__dirname + "\\..\\tasks\\")
-const {taskList, amounts, taskEnableJson} = readTasks(directory)
+
 
 router.use(bodyParser.json())
 
 router.get("/", (req, res) => {
+    const {taskList, amounts, taskEnableJson} = readTasks(directory)
     res.render("host", {taskList, amounts, taskEnableJson})
 })
 
 
 router.get("/get-options", (req, res) =>{
-
+    const {taskList, amounts, taskEnableJson} = readTasks(directory)
     try {
         //console.log(taskEnableJson)
 
@@ -30,7 +31,6 @@ router.get("/get-options", (req, res) =>{
         res.status(500).json({"error":error})
         console.log(error)
     }
-    
 })
 
 router.post("/set-options", (req, res) =>{
@@ -45,17 +45,18 @@ router.post("/set-options", (req, res) =>{
 })
 
 router.get("/get-QR", (req, res) => {
+    const {taskEnableJson, taskList} = readTasks(directory)
     const PDFKit = require('pdfkit')
     const doc = new PDFKit({autoFirstPage:false, size:"A4"})
     const {readQr} = require("../code_tools/qrGenerator")
-
-    //console.log(taskEnableJson.current)
     
     if (taskEnableJson.current.long + taskEnableJson.current.short + taskEnableJson.current.normal) {
-
     const QrCodes = readQr()
-    for (item of taskList) {
-        if (!taskList[item][enabled]) continue;
+    for (item in taskList) {
+        if (!taskEnableJson["enabled"][item]) {
+            console.log("continuing", item)
+            continue
+        }
 
         doc.addPage()
         doc.text(`This page will be the QR-Code to "${item}"`)
@@ -65,13 +66,10 @@ router.get("/get-QR", (req, res) => {
     doc.pipe(res)
     doc.end()
     }else{
-        //responde with invallid settings?
-        //still tries to download, don't know what to do.
         doc.addPage()
         doc.text("Must have at least one task!")
         doc.pipe(res)
         doc.end()
-        //res.status(400).json({error: "Must have at least one task!"})
     }
 })
 

@@ -77,7 +77,6 @@ async function changePreferences() {
 }
 
 async function sendAPI() {
-    //console.log("API SENT")
     try {
         const response = await fetch("/host/get-options")
         if (!response.ok) throw new Error("FAIL");
@@ -105,19 +104,6 @@ function checkIfGameReady(cb, fail) {
     document.querySelectorAll(".enableOption input").forEach(item => {
         tasksMap.set(item.id, item.checked)
     })
-    //This is currently redundand, but I left it in place to check for errors just in case
-    calledAPI.then(value => {
-        for (taskType in value.list) {
-           if (value["list"][taskType].filter(task =>{
-               return new Map(
-                [...tasksMap]
-                .filter(([k, v]) => v)
-            ).has(task.name)
-           }).length < taskAmounts[taskType]){
-               if (fail) fail()
-               return false
-           }
-        }
     if (cb) {
         cb({
             "enabled":Object.fromEntries(tasksMap),
@@ -125,9 +111,6 @@ function checkIfGameReady(cb, fail) {
         })
     }
     return true
- }).catch(reason =>{
-    console.log(reason)
- })
 }
 
 function playGame() {
