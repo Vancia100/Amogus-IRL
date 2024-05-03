@@ -99,12 +99,16 @@ router.post("/checkGame", (req, res) => {
 })
 
 
-function assignRandomTasks() {
+function assignRandomTasks(impostors = 1) {
   const readTasks = require("../code_tools/read_all_files")
   const {amounts, taskEnableJson} = readTasks()
+  const iterablePlayers =[...players.keys()]
+  for (let i = 0; i < impostors; i++){
+    impostors = iterablePlayers.splice(Math.floor(players.size * Math.random()), 1)[0]
+    players.get(impostors)["impostor"] = true
+  }
   players.forEach(player =>{
     const tasks = []
-    console.log(amounts, taskEnableJson)
 
     for (typeOfTask in amounts) {
       const filteredList = amounts[typeOfTask].filter(task => {
@@ -120,6 +124,7 @@ function assignRandomTasks() {
     }
     player.send(JSON.stringify({
       "event": "start",
+      "impostor": player.impostor ? player.impostor : false,
       tasks
     }))
   })
