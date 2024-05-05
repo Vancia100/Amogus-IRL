@@ -13,13 +13,13 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
     const taskdirectory = fs.readdirSync(directory).filter( (thing) => {
         return(fs.statSync(`${directory}/${thing}`).isDirectory());
     })
-    let taskList = []
+    let taskList = {} //Could just do thease to const
     let long = []
     let short = []
     let normal = []
 
     for (let task of taskdirectory) {
-        const taskDir = fs.readdirSync(directory + task).filter((thing) => thing.endsWith(".js"))[0]
+        const taskDir = fs.readdirSync(directory + task).filter((thing) => thing.endsWith("task.js"))[0]
         const {...taskOptions} = require(directory + task + "\\" + taskDir)
         const options = taskOptions.options
         const taskEnabled = taskEnableJson["enabled"] && taskEnableJson["enabled"][options.name]? taskEnableJson["enabled"][options.name] : false
@@ -36,12 +36,13 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
             default:
                 break;
         }
-        taskList.push({"enabled":taskEnabled, ...options})
+        if (taskList[options.name]) throw new Error(`All tasks need a unique name! \nThere are currently 2 tasks named ${options.name}`)
+        taskList[options.name] = {"enabled":taskEnabled, ...options}
     }
     const amounts = {
-        long,
         short,
         normal,
+        long,
     }
     return {taskList, amounts, taskEnableJson}
 }

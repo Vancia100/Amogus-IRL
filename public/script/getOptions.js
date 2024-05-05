@@ -1,12 +1,23 @@
 const calledAPI = sendAPI()
 
-window.addEventListener("beforeunload", () => {
-    changePreferences()
-})
-
 document.addEventListener("DOMContentLoaded", async () =>{
         const response = await calledAPI
-        
+        const maxAmounts = response.max
+        document.querySelectorAll(".enableOption input").forEach(item => {
+            const checkboxTaskType = response["lookup"][item.id]["type"]
+            if (!item.checked) maxAmounts[checkboxTaskType] --
+
+            item.addEventListener("change", () =>{
+                if (item.checked) {
+                    maxAmounts[checkboxTaskType] ++
+                    return
+                }
+                maxAmounts[checkboxTaskType] --
+                const thisCounter = document.getElementById(checkboxTaskType).childNodes[5].childNodes[1]
+                if (Number(thisCounter.textContent) > maxAmounts[checkboxTaskType]) thisCounter.textContent = maxAmounts[checkboxTaskType]
+            })
+        })
+
         document.querySelectorAll(".arrowIcon").forEach(item => {
             item.addEventListener("click", (event) => {
                 if(event.target.classList.contains("mirrored")) {
@@ -15,13 +26,23 @@ document.addEventListener("DOMContentLoaded", async () =>{
                 }else {
                     const amount = Number(event.target.previousElementSibling.childNodes[1].textContent)
                     const parentID = event.target.parentNode.id
-                    event.target.previousElementSibling.childNodes[1].textContent = (amount <response["max"][parentID] ? amount + 1 : amount)
-                    console.log(parentID)
+                    event.target.previousElementSibling.childNodes[1].textContent = (amount < maxAmounts[parentID] ? amount + 1 : amount)
                 }
             })
         })
 })
 
+window.addEventListener("beforeunload", changePreferences)
+
+
+downloadBtn = document.getElementById("downloadBtn")
+downloadBtn.addEventListener("click", (event) =>{
+    if(!checkIfGameReady()) {
+            event.preventDefault()
+            downloadBtn.childNodes[1].style.borderColor = "#b53933"
+            window.alert("Invalid Settigns!")
+        }
+})
 
 async function requestOptions() {
     const settingsList = document.getElementById("settingsMenue")
@@ -35,23 +56,8 @@ async function requestOptions() {
     startBtn.classList.toggle("hide")
 }
 
-function loadPreferences(){
-    let apicall = {enabled: {}, current: {}}
-
-    document.querySelectorAll(".enableOption input").forEach(item => {
-        //console.log(item)
-        apicall["enabled"][item.id] = item.checked
-    })
-    document.querySelectorAll(".taskAmount").forEach(item => {
-        apicall["current"][item.parentNode.parentNode.id] = Number(item.textContent)
-    })
-    //console.log(apicall)
-    return(apicall)
-}
-
 async function changePreferences() {
     checkIfGameReady(async (apicall) =>{
-        const downloadBtn = document.getElementById("downloadBtn")
         const optionsSet = await fetch("/host/set-options", {
             method: "POST",
             headers: {
@@ -71,7 +77,6 @@ async function changePreferences() {
 }
 
 async function sendAPI() {
-    //console.log("API SENT")
     try {
         const response = await fetch("/host/get-options")
         if (!response.ok) throw new Error("FAIL");
@@ -81,27 +86,31 @@ async function sendAPI() {
         console.log(error)
     }
 }
-downloadBtn = document.getElementById("downloadBtn")
-downloadBtn.addEventListener("click", (event) =>{
-    //console.log(checkIfGameReady())
-    if(!checkIfGameReady()) {
-            event.preventDefault()
-            downloadBtn.childNodes[1].style.borderColor = "#b53933"
-            //window.alert("Invalid Settigns!")
-        }
-})
 
-//change structure of the API to make sure this works properly?
 function checkIfGameReady(cb, fail) {
- const prefrences = loadPreferences()
-for (const key in prefrences.enabled) {
-    if (prefrences.enabled[key]) {
-        if (cb) cb(prefrences);
-        return true
+
+    const taskAmounts = {}
+    let taskAmountsCounter = 0
+    document.querySelectorAll(".taskAmount").forEach(item => {
+        taskAmounts[item.parentNode.parentNode.id] = Number(item.textContent)
+        taskAmountsCounter = taskAmountsCounter + Number(item.textContent)
+    })
+
+    if (!taskAmountsCounter) {
+        if(fail) fail()
+        return false
     }
-}
-if (fail) fail();
-return false
+    const tasksMap = new Map()
+    document.querySelectorAll(".enableOption input").forEach(item => {
+        tasksMap.set(item.id, item.checked)
+    })
+    if (cb) {
+        cb({
+            "enabled":Object.fromEntries(tasksMap),
+            "current":taskAmounts
+        })
+    }
+    return true
 }
 
 function playGame() {

@@ -1,6 +1,6 @@
 let playerCount = 0
 
-const socket = new WebSocket("ws://localhost:3001/play")
+const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
 
 document.addEventListener("DOMContentLoaded", () =>{
     console.log("tried opening socket")
@@ -67,12 +67,20 @@ document.addEventListener("DOMContentLoaded", () =>{
 
 function startGameBtn() {
     console.log("Tried Starting game")
-    if(playerCount >= 4){
+    if(playerCount >= 1){ //4
         console.log("Tried starting game")
         socket.send(JSON.stringify({
             client:"HOST",
             action: "start",
         }))
+        const startGameBtn = document.getElementById("startGameBtn")
+        startGameBtn.remove()
+        const containers = document.querySelectorAll(".container")
+        console.log(containers)
+        containers.forEach(item =>{
+            item.classList.toggle("invisible")
+        })
+
     } else{
         console.log("Not enough players!")
     }
@@ -81,11 +89,8 @@ function startGameBtn() {
 
 function updatePlayerCount(kick = false) {
     const playerCounterDiv = document.getElementById("playerCount")
-    if (kick) {
-        playerCount --
-    } else {
-        playerCount ++
-    }
+    
+    playerCount = kick ? playerCount - 1 : playerCount + 1
     playerCounterDiv.textContent = playerCount
     //when start button is available add so that us unblurred
 }

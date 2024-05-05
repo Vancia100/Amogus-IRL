@@ -39,3 +39,11 @@ h2 {
     margin-left: 20px;
     flex-shrink: 0;
 }
+
+.toAnimete{
+    animation-duration: 5;
+    animation-name: sizeable;
+}
+@keyframes sizeable{
+    75%{scale: 100%;}
+}

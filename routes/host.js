@@ -4,21 +4,24 @@ const fs = require("fs")
 const bodyParser = require('body-parser');
 const readTasks = require("../code_tools/read_all_files")
 const directory = (__dirname + "\\..\\tasks\\")
-const {taskList, amounts, taskEnableJson} = readTasks(directory)
+
 
 router.use(bodyParser.json())
 
 router.get("/", (req, res) => {
-    res.render("host", {taskEnableJson})
+    const {taskList, amounts, taskEnableJson} = readTasks(directory)
+    res.render("host", {taskList, amounts, taskEnableJson})
 })
 
-router.get("/get-options", (req, res) =>{
 
+router.get("/get-options", (req, res) =>{
+    const {taskList, amounts, taskEnableJson} = readTasks(directory)
     try {
         //console.log(taskEnableJson)
 
         const response = {
-            "list": taskList,
+            "list": amounts,
+            "lookup":taskList,
             "max": {"short":amounts.short.length, "long": amounts.long.length, "normal": amounts.normal.length},
             "current": taskEnableJson["current"] ? taskEnableJson["current"] : {"short": 0, "long": 0, "normal": 0,}
             }
@@ -28,7 +31,6 @@ router.get("/get-options", (req, res) =>{
         res.status(500).json({"error":error})
         console.log(error)
     }
-    
 })
 
 router.post("/set-options", (req, res) =>{
@@ -43,33 +45,31 @@ router.post("/set-options", (req, res) =>{
 })
 
 router.get("/get-QR", (req, res) => {
+    const {taskEnableJson, taskList} = readTasks(directory)
     const PDFKit = require('pdfkit')
     const doc = new PDFKit({autoFirstPage:false, size:"A4"})
     const {readQr} = require("../code_tools/qrGenerator")
-
-    //console.log(taskEnableJson.current)
     
-    if (taskEnableJson.current.long >= 1 || taskEnableJson.current.short >= 1 || taskEnableJson.current.normal >= 1) {
-
+    if (taskEnableJson.current.long + taskEnableJson.current.short + taskEnableJson.current.normal) {
     const QrCodes = readQr()
-    taskList.filter(item => {
-        return item.enabled
-    }).forEach(item => {
+    for (item in taskList) {
+        if (!taskEnableJson["enabled"][item]) {
+            console.log("continuing", item)
+            continue
+        }
+
         doc.addPage()
-        doc.text(`This page will be the QR-Code to "${item.name}"`)
-        doc.image(QrCodes[item.name], {width: 400, height: 400})
-    })
+        doc.text(`This page will be the QR-Code to "${item}"`)
+        doc.image(QrCodes[item], {width: 400, height: 400})
+    }
 
     doc.pipe(res)
     doc.end()
     }else{
-        //responde with invallid settings?
-        //still tries to download, don't know what to do.
         doc.addPage()
         doc.text("Must have at least one task!")
         doc.pipe(res)
         doc.end()
-        //res.status(400).json({error: "Must have at least one task!"})
     }
 })
 
