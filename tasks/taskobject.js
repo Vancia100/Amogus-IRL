@@ -31,14 +31,16 @@ function copyFiles(source, thisName){
         if (item.endsWith(".html")) {
             htmlData = fs.readFileSync(path.join(source, item), "utf-8")
             //chat GPT code, no clue how it works but it does
-            const modifiedData = htmlData.replace(/(src="|href=")([^"]+)/g, (match, p1, p2) => {
+            const bodyContent = htmlData.substring(htmlData.indexOf('<body>') + 6, htmlData.indexOf('</body>'));
+
+            const modifiedHTML = bodyContent.replace(/(src="|href=")([^"]+)/g, (match, p1, p2) => {
                 // Add the taskName prefix to URLs
                 return `${p1}/tasks/${thisName}/${p2}`;
             });
-            fs.writeFile(path.join(pathToTask, item), modifiedData, "utf-8", err =>{
+
+            fs.writeFile(path.join(pathToTask, item), modifiedHTML, "utf-8", err =>{
                 if (err) console.log(err)
             })
-            console.log(modifiedData)
             return
         }
         fs.cp(path.join(source, item), path.join(pathToTask, item), (err) =>{
