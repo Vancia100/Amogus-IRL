@@ -23,6 +23,11 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
         const {...taskOptions} = require(directory + task + "\\" + taskDir)
         const options = taskOptions.options
         const taskEnabled = taskEnableJson["enabled"] && taskEnableJson["enabled"][options.name]? taskEnableJson["enabled"][options.name] : false
+        if (taskList[options.name]) throw new Error(`All tasks need a unique name! \nThere are currently 2 tasks named ${options.name}`)
+            const requiredTaskObject = require(directory + task + "\\" + taskDir)
+            requiredTaskObject.enabled = taskEnabled
+            taskList[options.name] = requiredTaskObject
+
         switch (options.type) {
             case "long":
                 long.push({"enabled":taskEnabled, ...options})
@@ -36,8 +41,6 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
             default:
                 break;
         }
-        if (taskList[options.name]) throw new Error(`All tasks need a unique name! \nThere are currently 2 tasks named ${options.name}`)
-        taskList[options.name] = {"enabled":taskEnabled, ...options}
     }
     const amounts = {
         short,

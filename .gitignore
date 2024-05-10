@@ -3,3 +3,4 @@
 /tasks/taskSettings.json
 /tasks/qr-codes.json
 /public/tasks/*
+**/task.json

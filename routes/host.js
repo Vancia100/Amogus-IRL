@@ -48,19 +48,16 @@ router.get("/get-QR", (req, res) => {
     const {taskEnableJson, taskList} = readTasks(directory)
     const PDFKit = require('pdfkit')
     const doc = new PDFKit({autoFirstPage:false, size:"A4"})
-    const {readQr} = require("../code_tools/qrGenerator")
     
     if (taskEnableJson.current.long + taskEnableJson.current.short + taskEnableJson.current.normal) {
-    const QrCodes = readQr()
     for (item in taskList) {
         if (!taskEnableJson["enabled"][item]) {
             console.log("continuing", item)
             continue
         }
-
         doc.addPage()
         doc.text(`This page will be the QR-Code to "${item}"`)
-        doc.image(QrCodes[item], {width: 400, height: 400})
+        doc.image(taskList[item]["qrCode"].toString("ascii"), {width:400, height:400})
     }
 
     doc.pipe(res)

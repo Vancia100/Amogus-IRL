@@ -1,18 +1,35 @@
 const fs = require("fs")
 const path = require("path")
-
+const qrCode = require("qrcode")
 class Task{
     constructor(inputName, type, source, file, instance = 1){
 
         this.name =  inputName.toLowerCase().replace(" ", "-")
         this.file = file
+        this.source = source
         this.options = {
             "name":checkName(inputName),
             "parts":instance,
             "type":checkType(type),
         }
         if(!fs.existsSync(`${__dirname}/../public/tasks/${this.name}`))   copyFiles(source, this.name)
+        if(!fs.existsSync(`${source}/task.json`)) {
+            qrCode.toDataURL(this.name, {errorCorrectionLevel: "H"},).then(value =>{
+                fs.writeFileSync(`${source}/task.json`, 
+                JSON.stringify(value),)
+                this.qrCode = value
+            })
+
+        }else{
+            this.qrCode = JSON.parse(fs.readFileSync(`${source}/task.json`))
+        }
     }
+    async redoQR() {
+        const qrData = await qrCode.toDataURL(this.name, {errorCorrectionLevel: "H"},)
+        fs.writeFileSync(`${this.source}/task.json`, 
+        JSON.stringify(qrData))
+        this.qrCode = qrData
+        }
 }
 function copyFiles(source, thisName){
     const pathToTask = `${__dirname}/../public/tasks/${thisName}`
