@@ -3,19 +3,18 @@ const router = express.Router()
 const fs = require("fs")
 const bodyParser = require('body-parser');
 const {readTasks, getQRCodes} = require("../code_tools/read_all_files")
-const directory = (__dirname + "\\..\\tasks\\")
 
 
 router.use(bodyParser.json())
 
 router.get("/", (req, res) => {
-    const {taskList, taskEnableJson} = readTasks(directory)
+    const {taskList, taskEnableJson} = readTasks()
     res.render("host", {taskList, taskEnableJson})
 })
 
 
 router.get("/get-options", (req, res) =>{
-    const {taskList, amounts, taskEnableJson} = readTasks(directory)
+    const {taskList, amounts, taskEnableJson} = readTasks()
     try {
         //console.log(taskEnableJson)
 
@@ -45,7 +44,7 @@ router.post("/set-options", (req, res) =>{
 })
 
 router.get("/get-QR", (req, res) => {
-    const {taskEnableJson, taskList} = getQRCodes(directory)
+    const {taskEnableJson, taskList} = getQRCodes()
     const PDFKit = require('pdfkit')
     const doc = new PDFKit({autoFirstPage:false, size:"A4"})
     
