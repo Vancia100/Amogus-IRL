@@ -2,14 +2,13 @@ const fs = require("fs")
 const path = require("path")
 const qrCode = require("qrcode")
 class Task{
-    constructor(inputName, type, source, file, instance = 1){
+    constructor(inputName, type, source, file,){
 
-        this.name =  inputName.toLowerCase().replace(" ", "-")
+        this.name =  inputName.toLowerCase().replace(/ /g, "-")
         this.file = file
         this.source = source
         this.options = {
             "name":checkName(inputName),
-            "parts":instance,
             "type":checkType(type),
         }
         if(!fs.existsSync(`${__dirname}/../public/tasks/${this.name}`))   copyFiles(source, this.name)
@@ -31,6 +30,8 @@ class Task{
         this.qrCode = qrData
         }
 }
+
+
 function copyFiles(source, thisName){
     const pathToTask = `${__dirname}/../public/tasks/${thisName}`
     if (!fs.existsSync(`${__dirname}/../public/tasks/`)) fs.mkdirSync(`${__dirname}/../public/tasks`)
@@ -42,7 +43,7 @@ function copyFiles(source, thisName){
             copyFiles(path.join(source, item), path.join(thisName, item))
             return false
         }
-        return item != "task.js"
+        return !(item == "task.js" || item == "task.json" )
     })
     tasksToCopy.forEach(item =>{
         if (item.endsWith(".html")) {

@@ -100,7 +100,7 @@ router.post("/checkGame", (req, res) => {
 
 
 function assignRandomTasks(impostors = 1) {
-  const readTasks = require("../code_tools/read_all_files")
+  const {readTasks} = require("../code_tools/read_all_files")
   const {amounts, taskEnableJson} = readTasks()
   const iterablePlayers =[...players.keys()]
   for (let i = 0; i < impostors; i++){
@@ -118,7 +118,6 @@ function assignRandomTasks(impostors = 1) {
       let i = 1
       while ( i <= amountOfThisTask && filteredList.length) {
         i++
-        //loop works but this line bellow does not work as intended.
         tasks.push(filteredList.splice(Math.floor(filteredList.length * Math.random()), 1)[0])
       }
     }

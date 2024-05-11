@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "nodemonConfig": {
-    "ignore": ["*.json", "public/javascripts/*.js"]
+    "ignore": ["*.json", "/public/script/*.js"]
   },
   "author": "Vancia",
   "license": "ISC",

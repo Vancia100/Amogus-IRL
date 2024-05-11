@@ -1,6 +1,35 @@
 const fs = require("fs")
+const directory = __dirname + "\\..\\tasks\\"
 
 function readTasks(directory = __dirname + "\\..\\tasks\\") {
+    const taskList = {}
+    const amounts = {
+        short:[],
+        normal:[],
+        long:[]
+    }
+    const taskEnableJson = loopTasks(item =>{
+        const options = item.options
+        if (taskList[options.name]) throw new Error(`All tasks need a unique name! \nThere are currently 2 tasks named ${options.name}`)
+
+        taskList[options.name] = options
+
+        amounts[options.type].push(options)
+    })
+    return {taskList, amounts, taskEnableJson}
+}
+
+function getQRCodes(inlcudeEverything = false) {
+    const taskList = {}
+    const taskEnableJson = loopTasks((item) =>{
+        if (item.options.enabled || inlcudeEverything) {
+            taskList[item.options.name] = item
+        }
+    })
+    return {taskList, taskEnableJson}
+}
+
+function loopTasks(cb) {
     try {
         const taskEnableJsonRaw = (fs.readFileSync(directory + "taskSettings.json", {
             encoding: "utf-8", flag: "r"
@@ -9,45 +38,16 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
         } catch (error) {
             var taskEnableJson = {}
         }
-
-    const taskdirectory = fs.readdirSync(directory).filter( (thing) => {
-        return(fs.statSync(`${directory}/${thing}`).isDirectory());
-    })
-    let taskList = {} //Could just do thease to const
-    let long = []
-    let short = []
-    let normal = []
-
-    for (let task of taskdirectory) {
-        const taskDir = fs.readdirSync(directory + task).filter((thing) => thing.endsWith("task.js"))[0]
-        const {...taskOptions} = require(directory + task + "\\" + taskDir)
-        const options = taskOptions.options
-        const taskEnabled = taskEnableJson["enabled"] && taskEnableJson["enabled"][options.name]? taskEnableJson["enabled"][options.name] : false
-        if (taskList[options.name]) throw new Error(`All tasks need a unique name! \nThere are currently 2 tasks named ${options.name}`)
-            const requiredTaskObject = require(directory + task + "\\" + taskDir)
-            requiredTaskObject.enabled = taskEnabled
-            taskList[options.name] = requiredTaskObject
-
-        switch (options.type) {
-            case "long":
-                long.push({"enabled":taskEnabled, ...options})
-                break;
-            case "short":
-                short.push({"enabled":taskEnabled, ...options})
-                break;
-            case "normal":
-                normal.push({"enabled":taskEnabled, ...options})
-                break
-            default:
-                break;
+        const taskdirectory = fs.readdirSync(directory).filter( (thing) => {
+            return(fs.statSync(`${directory}/${thing}`).isDirectory());
+        })
+        for (let task of taskdirectory) {
+            const taskOptions = require(directory + task + "\\task.js")
+            const taskEnabled = taskEnableJson["enabled"] && taskEnableJson["enabled"][taskOptions.options.name]? taskEnableJson["enabled"][taskOptions.options.name] : false
+            taskOptions.options.enabled = taskEnabled
+            cb(taskOptions)
         }
-    }
-    const amounts = {
-        short,
-        normal,
-        long,
-    }
-    return {taskList, amounts, taskEnableJson}
+        return taskEnableJson
 }
-module.exports = readTasks
-//console.log(readTasks())
+module.exports = {readTasks, getQRCodes}
+//console.log(getQRCodes())

@@ -22,7 +22,8 @@
     
     <div class="settingsMenue" id="settingsMenue">
         <ul id="settingslist">
-            <% for (const item in amounts) {%>
+            <%  typeList = ["short", "normal", "long"]
+                for (const item of typeList) {%>
                 <li>
                     <div class="settingsOption" id="<%=item%>">
                         <h3 class="text1">amount of <%=item%> tasks: </h3>

@@ -2,15 +2,15 @@ const express = require("express")
 const router = express.Router() 
 const fs = require("fs")
 const bodyParser = require('body-parser');
-const readTasks = require("../code_tools/read_all_files")
+const {readTasks, getQRCodes} = require("../code_tools/read_all_files")
 const directory = (__dirname + "\\..\\tasks\\")
 
 
 router.use(bodyParser.json())
 
 router.get("/", (req, res) => {
-    const {taskList, amounts, taskEnableJson} = readTasks(directory)
-    res.render("host", {taskList, amounts, taskEnableJson})
+    const {taskList, taskEnableJson} = readTasks(directory)
+    res.render("host", {taskList, taskEnableJson})
 })
 
 
@@ -45,16 +45,12 @@ router.post("/set-options", (req, res) =>{
 })
 
 router.get("/get-QR", (req, res) => {
-    const {taskEnableJson, taskList} = readTasks(directory)
+    const {taskEnableJson, taskList} = getQRCodes(directory)
     const PDFKit = require('pdfkit')
     const doc = new PDFKit({autoFirstPage:false, size:"A4"})
     
     if (taskEnableJson.current.long + taskEnableJson.current.short + taskEnableJson.current.normal) {
     for (item in taskList) {
-        if (!taskEnableJson["enabled"][item]) {
-            console.log("continuing", item)
-            continue
-        }
         doc.addPage()
         doc.text(`This page will be the QR-Code to "${item}"`)
         doc.image(taskList[item]["qrCode"].toString("ascii"), {width:400, height:400})
