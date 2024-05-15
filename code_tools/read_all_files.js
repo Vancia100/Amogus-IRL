@@ -1,7 +1,7 @@
 const fs = require("fs")
 const directory = __dirname + "\\..\\tasks\\"
 
-function readTasks(directory = __dirname + "\\..\\tasks\\") {
+function readTasks() {
     const taskList = {}
     const amounts = {
         short:[],
@@ -9,7 +9,7 @@ function readTasks(directory = __dirname + "\\..\\tasks\\") {
         long:[]
     }
     const taskEnableJson = loopTasks(item =>{
-        const options = item.options
+        const options = {...item.options, directory:item._internals.file}
         if (taskList[options.name]) throw new Error(`All tasks need a unique name! \nThere are currently 2 tasks named ${options.name}`)
 
         taskList[options.name] = options
@@ -50,4 +50,4 @@ function loopTasks(cb) {
         return taskEnableJson
 }
 module.exports = {readTasks, getQRCodes}
-//console.log(getQRCodes())
+//console.log(readTasks())
