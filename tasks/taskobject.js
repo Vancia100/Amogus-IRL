@@ -13,8 +13,16 @@ class Task{
             ejsSettings: ejsSettings
         }
         this.options = {
-            "name":checkName(inputName),
-            "type":checkType(type),
+            "name": inputName,
+            "type": (function (typeCheck) {
+                const newtype = typeCheck.toLowerCase()
+                const allowed = ["short", "normal", "long"]
+                if (allowed.indexOf(newtype) != -1) {
+                    return newtype;
+                }else {
+                    throw new Error('The supled task type did not equal "normal", "short", or "long"!');
+                }
+            })(type),
         }
         if(!fs.existsSync(`${__dirname}/../public/tasks/${this.name}`))   copyFiles(source, this.name, ejsSettings)
         if(!fs.existsSync(`${source}/task.json`)) {
@@ -83,24 +91,6 @@ function copyFiles(source, thisName, ejsSettings){
             if (err) throw (err)
         })
     })
-}
-
-
-function checkName(nameCheck){
-    const forbidden = ["pictures", "script", "styles", "tasks"]
-    if (forbidden.indexOf(this.name) != -1) {
-        throw new Error(`The taskname ${nameCheck} is not a valid name!`)
-    }
-    return nameCheck
-}
-function checkType(typeCheck){
-    const newtype = typeCheck.toLowerCase()
-    const allowed = ["short", "normal", "long"]
-    if (allowed.indexOf(newtype) != -1) {
-        return newtype;
-    }else {
-        throw new Error('The supled task type did not equal "normal", "short", or "long"!');
-    }
 }
 function removeEntireDirectory(directory) {
     //console.log("removing direcrory", directory)

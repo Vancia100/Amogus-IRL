@@ -35,7 +35,7 @@ router.get("/get-options", (req, res) =>{
 router.post("/set-options", (req, res) =>{
     const settings = req.body;
     //console.log(settings)
-    fs.writeFileSync(directory + "taskSettings.json", JSON.stringify(settings, null, 4), { flag: 'w+', encoding: "utf-8" }, err => {
+    fs.writeFileSync("./tasks/taskSettings.json", JSON.stringify(settings, null, 4), { flag: 'w+', encoding: "utf-8" }, err => {
         if (err) console.error(err)
         return res.status(500).json({error: "Failed to save settings to file"})
     });
