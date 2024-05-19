@@ -37,6 +37,22 @@ body{
   font-size: 7vh;
   line-height: 0;
 }
+.box2 {
+  vertical-align: middle;
+  letter-spacing: .7rem;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 30vw;
+  margin:auto;
+  background-color: rgb(21, 20, 20);
+  border-radius: 12px;
+  margin-top: 3vh;
+  margin-bottom: 3vh;
+  border: 3px solid rgb(255, 255, 255);
+  text-align: center;
+  height: 15vh;
+}
 .button{
   vertical-align: middle;
   letter-spacing: .7rem;

@@ -1,0 +1,29 @@
+.menueOptionWindow{
+    position: fixed;
+    top: 5vh;
+    right: -100%;
+    width: 90vw;
+    height: 90vh;
+    background-color: hsla(0, 0%, 10%, 0.757);
+    z-index: 10;
+    border: 4px solid rgb(0, 0, 0);
+    border-radius: 10px;
+    display: block;
+    transition: right 0.3s ease;
+    align-content: center;
+    animation: slideInOut 3.5s ease;
+}
+.menueOptionWindow img{
+    max-width: 80vw;
+    max-height: 80vh;
+}
+@keyframes slideInOut {
+    from{right:  -100%;}
+    15%{right: 5vw;}
+    85%{right: 5vw;}
+    to{right: -100%;}
+}
+
+.menueOptionWindow .active{
+right: 0;
+}
