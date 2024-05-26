@@ -1,6 +1,7 @@
 let playerCount = 0
 
 const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
+const livePlayers = []
 
 document.addEventListener("DOMContentLoaded", () =>{
     console.log("tried opening socket")
@@ -38,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () =>{
                 playerDiv.addEventListener("click", () =>{
                     socket.send(JSON.stringify({
                         client:"HOST",
-                        action: "kick",
+                        event: "kick",
                         player: playerDiv.id
                     }))
                 })
@@ -52,6 +53,11 @@ document.addEventListener("DOMContentLoaded", () =>{
                     updatePlayerCount(true)
                     nowKickedPlayer.remove()
                 }
+                break
+            case "beginGame":
+                //Show task counters and emergency button
+                break
+            case "updateTaskCounter":
                 break
             default:
                 console.error("Unknown message recived from WS")
@@ -71,7 +77,7 @@ function startGameBtn() {
         console.log("Tried starting game")
         socket.send(JSON.stringify({
             client:"HOST",
-            action: "start",
+            event: "start",
         }))
         const startGameBtn = document.getElementById("startGameBtn")
         startGameBtn.remove()
