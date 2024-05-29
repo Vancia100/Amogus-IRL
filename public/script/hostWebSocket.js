@@ -1,3 +1,4 @@
+import taskCounterObject from "./Object/taskCounterObject"
 let playerCount = 0
 
 const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
@@ -10,6 +11,8 @@ document.addEventListener("DOMContentLoaded", () =>{
         socket.send(JSON.stringify({client: "HOST"}))
     })
     socket.addEventListener("message", (message) => {
+        customElements.define("task-counter", taskCounterObject)
+        const taskCounter = new taskCounterObject("taskCounter")
         const messageJSON = JSON.parse(message.data)
         console.log(messageJSON)
         switch (messageJSON.event) {
@@ -55,10 +58,11 @@ document.addEventListener("DOMContentLoaded", () =>{
                 }
                 break
             case "beginGame":
-                //Show task counters and emergency button
+                //Show emergency button and add that functionality...
+                taskCounter.defineMaxTaskAmount(messageJSON.totalTaskAmount)
                 break
             case "updateTaskCounter":
-                break
+                taskCounter.updateTaskCount()
             default:
                 console.error("Unknown message recived from WS")
         }
@@ -98,5 +102,5 @@ function updatePlayerCount(kick = false) {
     
     playerCount = kick ? playerCount - 1 : playerCount + 1
     playerCounterDiv.textContent = playerCount
-    //when start button is available add so that us unblurred
+    //when start button is available add so that is unblurred
 }

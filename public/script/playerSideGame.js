@@ -1,9 +1,13 @@
+import taskCounterObject from "./Object/taskCounterObject"
+
 const playerData = {
     event: "join",
     username: localStorage.getItem("username")
     }
 
 document.addEventListener("DOMContentLoaded", () => {
+    customElements.define("task-counter", taskCounterObject)
+    const taskCounter = new taskCounterObject("taskCounter")
     const nameField = document.getElementById("myUsername")
     nameField.textContent = playerData.username
 
@@ -17,9 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
         switch (messageJSON.action) {
             case "start":
                 doStartupAnimation(messageJSON)
+                taskCounter.defineMaxTaskAmount(messageJSON.totalTaskAmount)
                 break
             case "updateTaskCounter":
-                console.log("one more task compleated by crewmate")
+                taskCounter.updateTaskCount()
                 break
             default:
                 console.log(messageJSON)
@@ -45,11 +50,10 @@ function doStartupAnimation(messageJSON) {
     playerImpostorText.classList.add("text1")
     startScreen.appendChild(playerImpostorScreen)
     startScreen.appendChild(playerImpostorText)
-    //This needs a rework already...
-    //Can preferably have it preloaded in html but invisible
     startScreen.classList.add("menueOptionWindow")
     
     startScreen.addEventListener("animationend", () =>{
+        startScreen.removeEventListener("animationend")
         const taskView = document.getElementById("taskDiv")
         for (task of messageJSON.tasks) {
             console.log(task)
@@ -61,12 +65,14 @@ function doStartupAnimation(messageJSON) {
         taskView.classList.remove("invisible")
         taskView.classList.add("menueOptionWindow")
         taskView.addEventListener("animationend", () =>{
-            const beQuietDiv = document.createElement("div")
-            const beQuietImage = document.createElement("img")
-            beQuietImage.src = "/pictures/playericon.svg" //Make real asset
+            taskView.removeEventListener("animationend")
+            const beQuietDiv = document.getElementById("beQuietDiv")
+            beQuietDiv.classList.remove("invisible")
             beQuietDiv.classList.add("menueOptionWindow")
             beQuietDiv.addEventListener("animationend", () =>{
-                console.log("StartGame!")
+                taskCounter.classList.remove("invisible")
+                taskView.removeEventListener("animationend")
+                beQuietDiv.log("StartGame!")
             })
         })
     })

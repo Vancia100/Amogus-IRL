@@ -14,6 +14,9 @@ let gameStarted = false
 let hostClient = null
 const players = new Map()
 
+//Ingame stats
+let isPlayerKilled = false
+
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected')
   ws.on('message', (message) => {
@@ -115,24 +118,32 @@ function assignRandomTasks(impostors = 1) {
   }
   players.forEach(player =>{
     const tasks = []
+    let totalTaskAmount = 0
 
     for (typeOfTask in amounts) {
       const filteredList = amounts[typeOfTask].filter(task => {
         return task.enabled 
       })
       const amountOfThisTask = taskEnableJson["current"][typeOfTask]
+      totalTaskAmount += amountOfThisTask
       let i = 1
       while ( i <= amountOfThisTask && filteredList.length) {
         i++
         tasks.push(filteredList.splice(Math.floor(filteredList.length * Math.random()), 1)[0])
       }
     }
+    totalTaskAmount = totalTaskAmount * players.length
     player.send(JSON.stringify({
       "action": "start",
       "impostor": player.impostor ? player.impostor : false,
+      totalTaskAmount,
       tasks
     }))
   })
+  hostClient.send(JSON.stringify({
+    "event": "beginGame",
+    totalTaskAmount,
+  }))
 }
 
 module.exports = router
