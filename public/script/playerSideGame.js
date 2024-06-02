@@ -1,16 +1,17 @@
-import taskCounterObject from "./Object/taskCounterObject"
+import taskCounterObject from "./Object/taskCounterObject.js"
 
 const playerData = {
     event: "join",
     username: localStorage.getItem("username")
     }
 
+
 document.addEventListener("DOMContentLoaded", () => {
     customElements.define("task-counter", taskCounterObject)
-    const taskCounter = new taskCounterObject("taskCounter")
+
     const nameField = document.getElementById("myUsername")
     nameField.textContent = playerData.username
-
+    const taskCounter = new taskCounterObject("taskCounter")
     const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
     socket.addEventListener("open", () =>{
         console.log("Started socket!")
@@ -20,12 +21,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const messageJSON = JSON.parse(message.data)
         switch (messageJSON.action) {
             case "start":
-                doStartupAnimation(messageJSON)
-                taskCounter.defineMaxTaskAmount(messageJSON.totalTaskAmount)
+                doStartupAnimation(messageJSON, () =>{
+                    taskCounter.classList.remove("invisible")
+                })
+                taskCounter.defineMaxTaskAmount(messageJSON.totalTaskAmount, messageJSON.playTime)
                 break
             case "updateTaskCounter":
                 taskCounter.updateTaskCount()
                 break
+            case "end":
+                //play endgame animation...
+                console.log(`You ${messageJSON.win ? "win" : "loose"}`)
             default:
                 console.log(messageJSON)
         }
@@ -39,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 })
 
-function doStartupAnimation(messageJSON) {
+function doStartupAnimation(messageJSON, cb) {
     const startScreen = document.getElementById("startScreen")
     startScreen.innerHTML = ""
     const playerImpostorScreen = document.createElement("img")
@@ -53,9 +59,8 @@ function doStartupAnimation(messageJSON) {
     startScreen.classList.add("menueOptionWindow")
     
     startScreen.addEventListener("animationend", () =>{
-        startScreen.removeEventListener("animationend")
         const taskView = document.getElementById("taskDiv")
-        for (task of messageJSON.tasks) {
+        for (const task of messageJSON.tasks) {
             console.log(task)
             const thisTaskDiv = document.createElement("div")
             thisTaskDiv.classList.add("box2", "text1")
@@ -65,14 +70,11 @@ function doStartupAnimation(messageJSON) {
         taskView.classList.remove("invisible")
         taskView.classList.add("menueOptionWindow")
         taskView.addEventListener("animationend", () =>{
-            taskView.removeEventListener("animationend")
             const beQuietDiv = document.getElementById("beQuietDiv")
             beQuietDiv.classList.remove("invisible")
             beQuietDiv.classList.add("menueOptionWindow")
             beQuietDiv.addEventListener("animationend", () =>{
-                taskCounter.classList.remove("invisible")
-                taskView.removeEventListener("animationend")
-                beQuietDiv.log("StartGame!")
+                cb()
             })
         })
     })

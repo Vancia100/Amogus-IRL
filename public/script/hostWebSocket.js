@@ -1,18 +1,22 @@
-import taskCounterObject from "./Object/taskCounterObject"
+import taskCounterObject from "./Object/taskCounterObject.js"
 let playerCount = 0
 
 const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
 const livePlayers = []
 
 document.addEventListener("DOMContentLoaded", () =>{
+
+    const startBtn = document.getElementById("startGameBtn")
+    startBtn.addEventListener("click", startGameBtn)
+
+    customElements.define("task-counter", taskCounterObject)
+    const taskCounter = new taskCounterObject("taskCounter")
     console.log("tried opening socket")
     socket.addEventListener("open", () =>{
         console.log("Started socket!")
         socket.send(JSON.stringify({client: "HOST"}))
     })
     socket.addEventListener("message", (message) => {
-        customElements.define("task-counter", taskCounterObject)
-        const taskCounter = new taskCounterObject("taskCounter")
         const messageJSON = JSON.parse(message.data)
         console.log(messageJSON)
         switch (messageJSON.event) {
@@ -59,7 +63,9 @@ document.addEventListener("DOMContentLoaded", () =>{
                 break
             case "beginGame":
                 //Show emergency button and add that functionality...
-                taskCounter.defineMaxTaskAmount(messageJSON.totalTaskAmount)
+                taskCounter.defineMaxTaskAmount(messageJSON.totalTaskAmount, messageJSON.playTime, endGame)
+                console.log(taskCounter.classList)
+                taskCounter.classList.remove("invisible")
                 break
             case "updateTaskCounter":
                 taskCounter.updateTaskCount()
@@ -83,8 +89,7 @@ function startGameBtn() {
             client:"HOST",
             event: "start",
         }))
-        const startGameBtn = document.getElementById("startGameBtn")
-        startGameBtn.remove()
+        document.getElementById("startGameBtn").remove()
         const containers = document.querySelectorAll(".container")
         console.log(containers)
         containers.forEach(item =>{
@@ -96,6 +101,18 @@ function startGameBtn() {
     }
 }
 
+
+function endGame(){
+    console.log("the game ended...")
+    socket.send(JSON.stringify({
+        client:"HOST",
+        event:"end",
+        isImpostorWin:false
+    }))
+    setTimeout(() =>{
+        location.reload()
+    }, 6000)
+}
 
 function updatePlayerCount(kick = false) {
     const playerCounterDiv = document.getElementById("playerCount")

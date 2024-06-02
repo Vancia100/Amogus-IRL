@@ -22,6 +22,14 @@
     
     <div class="settingsMenue" id="settingsMenue">
         <ul id="settingslist">
+            <li>
+                <div class="settingsOption">
+                    <h3 class="text1">Playtime </h3>
+                    <input type="number" value=<%=taskEnableJson.time || 60%> min="45" max="600" id="timeInput">
+                    <h3 class="text1"> s</h3>
+                </div>
+            </li>
+            <br>
             <%  typeList = ["short", "normal", "long"]
                 for (const item of typeList) {%>
                 <li>

@@ -93,7 +93,7 @@ function checkIfGameReady(cb, fail) {
     let taskAmountsCounter = 0
     document.querySelectorAll(".taskAmount").forEach(item => {
         taskAmounts[item.parentNode.parentNode.id] = Number(item.textContent)
-        taskAmountsCounter = taskAmountsCounter + Number(item.textContent)
+        taskAmountsCounter += Number(item.textContent)
     })
 
     if (!taskAmountsCounter) {
@@ -105,9 +105,11 @@ function checkIfGameReady(cb, fail) {
         tasksMap.set(item.id, item.checked)
     })
     if (cb) {
+        const timeInput = Number (document.getElementById("timeInput").value)
         cb({
             "enabled":Object.fromEntries(tasksMap),
-            "current":taskAmounts
+            "current":taskAmounts,
+            "time":timeInput
         })
     }
     return true

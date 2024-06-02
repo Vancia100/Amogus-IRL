@@ -29,7 +29,7 @@ wss.on('connection', (ws) => {
         hostClient = ws
         ws.playerId = 0
         console.log("GAME STARTED!", ms)
-      }else{
+      }else if (ws === hostClient){
         switch (ms.event) {
           case "kick":
             console.log(ms.player)
@@ -41,6 +41,17 @@ wss.on('connection', (ws) => {
             gameStarted = true
             gameJoinable = false
             assignRandomTasks()
+            break
+          case "end":
+            console.log("Game should have ended")
+            players.forEach(player =>{
+              player.send(JSON.stringify({
+                action:"end",
+                win: player.impostor ? ms.isImpostorWin : !ms.isImpostorWin
+              }))
+            })
+            players.clear()
+            hostClient = null
             break
           default:
             ws.close()
@@ -56,9 +67,10 @@ wss.on('connection', (ws) => {
             ws.close()
             break
           }
-          console.log("Sent massage to host")
+          console.log("Player has joined send message to host")
           players.set(ms.username, ws)
           ws.playerId = ms.username
+          ws.impostor = false
           ws.alive = true
           hostClient.send(JSON.stringify(ms))
           break
@@ -107,6 +119,9 @@ router.post("/checkGame", (req, res) => {
   }))
 })
 
+function endGame() {
+  console.log("the game is ending!")
+}
 
 function assignRandomTasks(impostors = 1) {
   const {readTasks} = require("../code_tools/read_all_files")
@@ -116,9 +131,9 @@ function assignRandomTasks(impostors = 1) {
     impostors = iterablePlayers.splice(Math.floor(players.size * Math.random()), 1)[0]
     players.get(impostors)["impostor"] = true
   }
+  let totalTaskAmount = 0
   players.forEach(player =>{
     const tasks = []
-    let totalTaskAmount = 0
 
     for (typeOfTask in amounts) {
       const filteredList = amounts[typeOfTask].filter(task => {
@@ -137,12 +152,14 @@ function assignRandomTasks(impostors = 1) {
       "action": "start",
       "impostor": player.impostor ? player.impostor : false,
       totalTaskAmount,
-      tasks
+      tasks,
+      playTime:taskEnableJson.time + 10
     }))
   })
   hostClient.send(JSON.stringify({
     "event": "beginGame",
     totalTaskAmount,
+    playTime: taskEnableJson.time + 10
   }))
 }
 
