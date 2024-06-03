@@ -32,6 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
             case "end":
                 //play endgame animation...
                 console.log(`You ${messageJSON.win ? "win" : "loose"}`)
+            case "vote":
+                //Now vote for the players that are left...
+                console.log("Vote Started!")
+                taskCounter.stopTimer()
             default:
                 console.log(messageJSON)
         }

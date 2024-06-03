@@ -76,9 +76,10 @@ class taskCounterObject extends HTMLElement{
         clearInterval(this._timerFunction)
     }
     startTimer(cb = null){
+        if (cb) this._timerCallback = cb
         this._timerFunction = setInterval(() =>{
-            if (cb && this.timerCount === 0) {
-                cb()
+            if (this._timerCallback && this.timerCount === 0) {
+                this._timerCallback()
                 this.stopTimer()
             }
             this._timer.textContent = `

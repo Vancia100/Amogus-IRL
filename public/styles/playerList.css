@@ -39,11 +39,27 @@ h2 {
     margin-left: 20px;
     flex-shrink: 0;
 }
-
+#emergencyButton{
+    position: fixed;
+    text-align: center;
+    right: 5vw;
+    top: 10vh;
+    width: 90vw;
+    height: 85vh;
+    align-items: center;
+    border: 3px solid rgb(51, 38, 38);
+    border-radius: 12px;
+}
+#emergencyButton img{
+    max-width: 90%;
+    max-height: 90%;
+    cursor: pointer;
+}
 .toAnimete{
     animation-duration: 5;
     animation-name: sizeable;
 }
 @keyframes sizeable{
+    from{scale: 0%;}
     75%{scale: 100%;}
 }

@@ -53,6 +53,13 @@ wss.on('connection', (ws) => {
             players.clear()
             hostClient = null
             break
+          case "vote":
+            players.forEach(player =>{
+              player.send(JSON.stringify({
+                action:"vote"
+              }))
+            })
+            break
           default:
             ws.close()
         }
@@ -74,7 +81,7 @@ wss.on('connection', (ws) => {
           ws.alive = true
           hostClient.send(JSON.stringify(ms))
           break
-        case "taskComplete":
+        case "playerSend":
           console.log(`${ws.playerId} completed a task`)
           players.forEach(player =>{
             player.send(JSON.stringify({

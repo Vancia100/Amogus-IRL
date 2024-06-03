@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () =>{
 
     const startBtn = document.getElementById("startGameBtn")
     startBtn.addEventListener("click", startGameBtn)
-
+    const emergencyBtn = document.getElementById("emergencyButton")
     customElements.define("task-counter", taskCounterObject)
     const taskCounter = new taskCounterObject("taskCounter")
     console.log("tried opening socket")
@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () =>{
                 taskCounter.defineMaxTaskAmount(messageJSON.totalTaskAmount, messageJSON.playTime, endGame)
                 console.log(taskCounter.classList)
                 taskCounter.classList.remove("invisible")
+                emergencyBtn.classList.remove("invisible")
                 break
             case "updateTaskCounter":
                 taskCounter.updateTaskCount()
@@ -78,6 +79,18 @@ document.addEventListener("DOMContentLoaded", () =>{
     })
     socket.addEventListener("close", () =>{
         //window.location = "/"
+    })
+
+    emergencyBtn.addEventListener("click", e =>{
+        taskCounter.stopTimer()
+        emergencyBtn.classList.add("invisible")
+        socket.send(JSON.stringify({
+            client:"HOST",
+            event:"vote",
+            time:taskCounter.timerCount
+        }))
+        //Wait for another press?
+        //Perhaps reuse this already existing player div?
     })
 })
 
