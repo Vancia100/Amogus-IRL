@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () =>{
     const emergencyBtn = document.getElementById("emergencyButton")
     customElements.define("task-counter", taskCounterObject)
     const taskCounter = new taskCounterObject("taskCounter")
-    console.log("tried opening socket")
+    const container = document.getElementById("playerContainer")
     socket.addEventListener("open", () =>{
         console.log("Started socket!")
         socket.send(JSON.stringify({client: "HOST"}))
@@ -19,11 +19,11 @@ document.addEventListener("DOMContentLoaded", () =>{
     socket.addEventListener("message", (message) => {
         const messageJSON = JSON.parse(message.data)
         console.log(messageJSON)
+
         switch (messageJSON.event) {
             case "join":
                 updatePlayerCount()
                 console.log("Tied adding box")
-                const container = document.getElementById("playerContainer")
                 const playerDiv = document.createElement("div")
                 const playerText = document.createElement("h2")
                 const playerIcon = document.createElement("img")
@@ -43,33 +43,48 @@ document.addEventListener("DOMContentLoaded", () =>{
                 playerTextDiv.appendChild(playerText)
                 playerDiv.appendChild(playerIconDiv)
                 playerDiv.appendChild(playerTextDiv)
-                playerDiv.addEventListener("click", () =>{
+
+                playerDiv._clickHandler = function () {
                     socket.send(JSON.stringify({
                         client:"HOST",
                         event: "kick",
                         player: playerDiv.id
                     }))
-                })
+                }
+                playerDiv.addEventListener("click", playerDiv._clickHandler)
                 container.appendChild(playerDiv)
                 break
 
             case "kick":
                 console.log("Tried kicking player", messageJSON.player)
-                nowKickedPlayer = document.getElementById(messageJSON.player)
+                const nowKickedPlayer = document.getElementById(messageJSON.player)
                 if (nowKickedPlayer) {
                     updatePlayerCount(true)
                     nowKickedPlayer.remove()
                 }
                 break
             case "beginGame":
-                //Show emergency button and add that functionality...
                 taskCounter.defineMaxTaskAmount(messageJSON.totalTaskAmount, messageJSON.playTime, endGame)
-                console.log(taskCounter.classList)
                 taskCounter.classList.remove("invisible")
                 emergencyBtn.classList.remove("invisible")
+
+                document.querySelectorAll(".player").forEach(playerDiv =>{
+                    playerDiv.removeEventListener("click", playerDiv._clickHandler)
+                    delete playerDiv._clickHandler
+                })
                 break
             case "updateTaskCounter":
                 taskCounter.updateTaskCount()
+                break
+            case "voteKicked":
+                //add small charachters to the names?
+                //Will that be too hard?
+                if (messageJSON.player){
+                    document.getElementById(messageJSON.player)?.remove()
+                }
+                taskCounter.timerCount = messageJSON.time
+                taskCounter.startTimer()
+                break
             default:
                 console.error("Unknown message recived from WS")
         }
@@ -80,18 +95,19 @@ document.addEventListener("DOMContentLoaded", () =>{
     socket.addEventListener("close", () =>{
         //window.location = "/"
     })
-
-    emergencyBtn.addEventListener("click", e =>{
-        taskCounter.stopTimer()
-        emergencyBtn.classList.add("invisible")
-        socket.send(JSON.stringify({
-            client:"HOST",
-            event:"vote",
-            time:taskCounter.timerCount
-        }))
-        //Wait for another press?
-        //Perhaps reuse this already existing player div?
-    })
+    setTimeout(() =>{
+        emergencyBtn.addEventListener("click", e =>{
+            taskCounter.stopTimer()
+            emergencyBtn.classList.add("invisible")
+            socket.send(JSON.stringify({
+                client:"HOST",
+                event:"vote",
+                time:taskCounter.timerCount
+            }))
+            //Wait for another press?
+            container.classList.remove("invisible")
+        })
+    }, 10000)
 })
 
 function startGameBtn() {
@@ -104,9 +120,8 @@ function startGameBtn() {
         }))
         document.getElementById("startGameBtn").remove()
         const containers = document.querySelectorAll(".container")
-        console.log(containers)
         containers.forEach(item =>{
-            item.classList.toggle("invisible")
+            item.classList.add("invisible")
         })
 
     } else{

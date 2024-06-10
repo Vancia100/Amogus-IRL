@@ -16,6 +16,8 @@ const players = new Map()
 
 //Ingame stats
 let isPlayerKilled = false
+const voting = new Map()
+let currentGameTime = 0
 
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected')
@@ -23,7 +25,6 @@ wss.on('connection', (ws) => {
     ms = JSON.parse(message)
     console.log('Received message from client:', ms)
     if (ms.client == "HOST") {
-      console.log("Host joined!")
       if (hostClient == null){
         gameJoinable = true
         hostClient = ws
@@ -44,7 +45,7 @@ wss.on('connection', (ws) => {
             break
           case "end":
             console.log("Game should have ended")
-            players.forEach(player =>{
+            wss.clients.forEach(player =>{
               player.send(JSON.stringify({
                 action:"end",
                 win: player.impostor ? ms.isImpostorWin : !ms.isImpostorWin
@@ -54,9 +55,11 @@ wss.on('connection', (ws) => {
             hostClient = null
             break
           case "vote":
+            currentGameTime = ms.time
             players.forEach(player =>{
               player.send(JSON.stringify({
-                action:"vote"
+                action:"vote",
+                playerList: [...players.keys()]
               }))
             })
             break
@@ -69,7 +72,6 @@ wss.on('connection', (ws) => {
       switch (ms.event){
         case "join":
           if (players.has(ms.username)) {
-            console.log("username is already in use!")
             ws.send(JSON.stringify({error:"usrName"}))
             ws.close()
             break
@@ -88,6 +90,45 @@ wss.on('connection', (ws) => {
               action: "updateTaskCounter"
             }))
           })
+          break
+        case "myVote":
+          voting.has(ms.player) ? voting.set(ms.player, voting.get(ms.player) +1) : voting.set(ms.player, 1)
+          console.log(voting)
+          let voteAmount = [...voting.values()].reduce((total, current) =>{
+            return total += current
+          })
+          console.log("Voting amount", voteAmount)
+          if (voteAmount == players.size) {
+            console.log("Voting complete!")
+            const kickingPlayer = [...voting.entries()].reduce(([highestPlayer, highestCount], [player, count]) =>{
+              return [
+                count > highestCount ? player : count == highestCount ? null :highestPlayer,
+                count < highestCount ? highestCount : count
+              ]
+            }, ["", 0])[0];
+              hostClient.send(JSON.stringify({
+                event:"voteKicked",
+                voteList: {...voting},
+                time: currentGameTime,
+                player: function(){
+                  if (kickingPlayer) {
+                    players.get(kickingPlayer).send(JSON.stringify({
+                      action:"die"
+                    }))
+                    players.delete(kickingPlayer)
+                    return kickingPlayer
+                  }
+                  return null
+                }()
+              }))
+            voting.clear()
+            players.forEach(player =>{
+              player.send(JSON.stringify({
+                action:"resume",
+                time: currentGameTime,
+              }))
+            })
+          }
           break
         default:
           console.log(ms)
@@ -133,13 +174,13 @@ function endGame() {
 function assignRandomTasks(impostors = 1) {
   const {readTasks} = require("../code_tools/read_all_files")
   const {amounts, taskEnableJson} = readTasks()
-  const iterablePlayers =[...players.keys()]
   for (let i = 0; i < impostors; i++){
-    impostors = iterablePlayers.splice(Math.floor(players.size * Math.random()), 1)[0]
+    impostors = [...players.keys()].splice(Math.floor(players.size * Math.random()), 1)[0]
     players.get(impostors)["impostor"] = true
   }
   let totalTaskAmount = 0
   players.forEach(player =>{
+    totalTaskAmount = 0
     const tasks = []
 
     for (typeOfTask in amounts) {
@@ -154,7 +195,7 @@ function assignRandomTasks(impostors = 1) {
         tasks.push(filteredList.splice(Math.floor(filteredList.length * Math.random()), 1)[0])
       }
     }
-    totalTaskAmount = totalTaskAmount * players.length
+    totalTaskAmount = totalTaskAmount * (players.size - impostors)
     player.send(JSON.stringify({
       "action": "start",
       "impostor": player.impostor ? player.impostor : false,

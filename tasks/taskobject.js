@@ -8,7 +8,9 @@ class Task{
 
         this.name =  inputName.toLowerCase().replace(/ /g, "-")
         this._internals = {
-            file,
+            file: ((fileCheck) => {
+                return fileCheck.endsWith(".ejs") ? fileCheck.replace(".ejs", ".html") : fileCheck
+            })(file),
             source,
             ejsSettings: ejsSettings
         }
@@ -65,24 +67,27 @@ function copyFiles(source, thisName, ejsSettings){
     tasksToCopy.forEach(item =>{
         if (item.endsWith(".html") | item.endsWith(".ejs")) {
             let htmlData = fs.readFileSync(path.join(source, item), "utf-8")
-
+            let itemName = item
             if (item.endsWith(".ejs")) {
                 try {
-                    htmlData = ejs.render(htmlData, ejsSettings[item]) 
+                    htmlData = ejs.render(htmlData, ejsSettings[item])
+                    itemName = item.replace(".ejs", ".html")
                 } catch (error) {
                     console.log(ejsSettings, error)
                 }
             }
 
             //chat GPT code, no clue how it works but it does
-            const bodyContent = htmlData.substring(htmlData.indexOf('<body>') + 6, htmlData.indexOf('</body>'));
+            const bodyTags = htmlData.indexOf('<body>')
+            if (bodyTags === -1) throw `${item} does not have a valid HTML body!`
+            const bodyContent = htmlData.substring(bodyTags + 6, htmlData.indexOf('</body>'));
 
             const modifiedHTML = bodyContent.replace(/(src="|href=")([^"]+)/g, (match, p1, p2) => {
                 // Add the taskName prefix to URLs
                 return `${p1}/tasks/${thisName}/${p2}`;
             });
 
-            fs.writeFile(path.join(pathToTask, item), modifiedHTML, "utf-8", err =>{
+            fs.writeFile(path.join(pathToTask, itemName), modifiedHTML, "utf-8", err =>{
                 if (err) console.log(err)
             })
             return

@@ -33,9 +33,55 @@ document.addEventListener("DOMContentLoaded", () => {
                 //play endgame animation...
                 console.log(`You ${messageJSON.win ? "win" : "loose"}`)
             case "vote":
+                const skipBtn = document.getElementById("skipBtn")
+                skipBtn.addEventListener("click", () =>{
+                    socket.send(JSON.stringify({
+                        event: "myVote",
+                        player: 0
+                    }))
+                    container.classList.add("invisible")
+                    document.querySelectorAll(".player").forEach(selectedPlayer =>{
+                        selectedPlayer.remove()
+                    })
+                })
                 //Now vote for the players that are left...
                 console.log("Vote Started!")
                 taskCounter.stopTimer()
+                const container = document.getElementById("playerContainer")
+                messageJSON.playerList.forEach(player => {
+                    const playerDiv = document.createElement("div")
+                    container.classList.remove("invisible")
+                    const playerText = document.createElement("h2")
+                    const playerIcon = document.createElement("img")
+                    const playerIconDiv = document.createElement("div")
+                    const playerTextDiv = document.createElement("div")
+                    playerIconDiv.classList.add("playerIconDiv")
+                    playerTextDiv.classList.add("playerTextDiv")
+                    playerIcon.id = `icon-${player}`
+                    playerIcon.src = "/pictures/playericon.svg"
+                    playerIcon.classList.add("playerIcon")
+                    playerIcon.width = "55"
+                    playerText.textContent = player
+                    playerText.classList.add("text1")
+                    playerDiv.classList.add("player")
+                    playerDiv.id = player
+                    playerIconDiv.appendChild(playerIcon)
+                    playerTextDiv.appendChild(playerText)
+                    playerDiv.appendChild(playerIconDiv)
+                    playerDiv.appendChild(playerTextDiv)
+                    playerDiv.addEventListener("click", () =>{
+                        socket.send(JSON.stringify({
+                            event: "myVote",
+                            player: player
+                        }))
+                        container.classList.add("invisible")
+                        document.querySelectorAll(".player").forEach(selectedPlayer =>{
+                            selectedPlayer.remove()
+                        })
+                    })
+                    //container.appendChild(playerDiv)
+                    container.insertBefore(playerDiv, skipBtn.parentElement)
+                });
             default:
                 console.log(messageJSON)
         }
@@ -48,7 +94,11 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location = "/"
     })
 })
+function sendVoteKick(socket, player) {
 
+    //add in a confirm option?
+    //perhaps some placeholder while waiting?
+}
 function doStartupAnimation(messageJSON, cb) {
     const startScreen = document.getElementById("startScreen")
     startScreen.innerHTML = ""
