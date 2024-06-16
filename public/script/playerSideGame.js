@@ -1,5 +1,5 @@
 import taskCounterObject from "./Object/taskCounterObject.js"
-
+let isImpostor = false
 const playerData = {
     event: "join",
     username: localStorage.getItem("username")
@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const messageJSON = JSON.parse(message.data)
         switch (messageJSON.action) {
             case "start":
+                isImpostor = messageJSON.impostor
                 doStartupAnimation(messageJSON, () =>{
                     taskCounter.classList.remove("invisible")
                 })
@@ -31,7 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 break
             case "end":
                 //play endgame animation...
-                console.log(`You ${messageJSON.win ? "win" : "loose"}`)
+                taskCounter.classList.add("invisible")
+                console.log(`You ${messageJSON.isImpostorWin == isImpostor ? "win" : "loose"}`)
             case "vote":
                 const skipBtn = document.getElementById("skipBtn")
                 skipBtn.addEventListener("click", () =>{
@@ -94,11 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location = "/"
     })
 })
-function sendVoteKick(socket, player) {
-
-    //add in a confirm option?
-    //perhaps some placeholder while waiting?
-}
 function doStartupAnimation(messageJSON, cb) {
     const startScreen = document.getElementById("startScreen")
     startScreen.innerHTML = ""
@@ -128,7 +125,7 @@ function doStartupAnimation(messageJSON, cb) {
             beQuietDiv.classList.remove("invisible")
             beQuietDiv.classList.add("menueOptionWindow")
             beQuietDiv.addEventListener("animationend", () =>{
-                cb()
+                cb && cb()
             })
         })
     })

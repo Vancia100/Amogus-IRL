@@ -15,9 +15,10 @@ let hostClient = null
 const players = new Map()
 
 //Ingame stats
-let isPlayerKilled = false
+let killedPlayers = []
 const voting = new Map()
 let currentGameTime = 0
+let impostorCount = 0
 
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected')
@@ -43,18 +44,12 @@ wss.on('connection', (ws) => {
             gameJoinable = false
             assignRandomTasks()
             break
-          case "end":
-            console.log("Game should have ended")
-            wss.clients.forEach(player =>{
-              player.send(JSON.stringify({
-                action:"end",
-                win: player.impostor ? ms.isImpostorWin : !ms.isImpostorWin
-              }))
-            })
-            players.clear()
-            hostClient = null
+          case "timeOut":
+            endGame(ms.isImpostorWin)
+            console.log("Time ran out!")
             break
           case "vote":
+            console.log("voting time!!!")
             currentGameTime = ms.time
             players.forEach(player =>{
               player.send(JSON.stringify({
@@ -64,7 +59,7 @@ wss.on('connection', (ws) => {
             })
             break
           default:
-            ws.close()
+            console.log("wierd message from host")
         }
       }
     }
@@ -76,16 +71,16 @@ wss.on('connection', (ws) => {
             ws.close()
             break
           }
-          console.log("Player has joined send message to host")
+          console.log("Player has joined, sending message to host")
           players.set(ms.username, ws)
           ws.playerId = ms.username
           ws.impostor = false
-          ws.alive = true
+          //ws.alive = true
           hostClient.send(JSON.stringify(ms))
           break
         case "playerSend":
           console.log(`${ws.playerId} completed a task`)
-          players.forEach(player =>{
+          wss.clients.forEach(player =>{
             player.send(JSON.stringify({
               action: "updateTaskCounter"
             }))
@@ -107,31 +102,75 @@ wss.on('connection', (ws) => {
               ]
             }, ["", 0])[0];
               hostClient.send(JSON.stringify({
-                event:"voteKicked",
-                voteList: {...voting},
-                time: currentGameTime,
-                player: function(){
+                ...{
+                  event:"voteKicked",
+                  voteList: {...voting},
+                  time: currentGameTime,
+                  },
+                ... function() {
+                  const resumeFunction = function(){
+                    players.forEach(player =>{
+                      player.send(JSON.stringify({
+                        action:"resume",
+                        time: currentGameTime,
+                      }))
+                    })
+                  }
+
                   if (kickingPlayer) {
+                    const returnObj = {}
                     players.get(kickingPlayer).send(JSON.stringify({
                       action:"die"
                     }))
+                    returnObj.player = kickingPlayer
+                    returnObj.impostor = false
+                    if (players.get(kickingPlayer).impostor) {
+                      returnObj.impostor = true,
+                      impostorCount --
+                    }
                     players.delete(kickingPlayer)
-                    return kickingPlayer
+                    checkEndGame(resumeFunction)
+                    return returnObj
                   }
-                  return null
+                  resumeFunction()
+                  return {}
                 }()
-              }))
+              }
+            ))
             voting.clear()
-            players.forEach(player =>{
-              player.send(JSON.stringify({
-                action:"resume",
-                time: currentGameTime,
-              }))
-            })
           }
           break
+        case "died":
+          killedPlayers.push(ws.playerId)
+          checkEndGame(() =>{
+
+          })
+          break
+        case "report":
+          if (killedPlayers) {
+            killedPlayers.forEach(player=>{
+              const playerSocket = players.get(player)
+              playerSocket.send(JSON.stringify({
+                action:"getBack"
+              }))
+              players.delete(player)
+            })
+            players.forEach(player =>{
+              player.send(JSON.stringify({
+                action:"vote",
+                playerList: [...players.keys()],
+              }))
+            })
+            killedPlayers = []
+            hostClient.send({
+
+            })
+          }else {
+            ws.send("ERR")
+          }
+        break
         default:
-          console.log(ms)
+          console.log("unknown command", ms)
       }
     } 
   })
@@ -166,12 +205,34 @@ router.post("/checkGame", (req, res) => {
     message: !gameJoinable ? players.has(inputUsername.username) ? "" : "Game not started" : "Username already in use"
   }))
 })
+function endGame(isImpostorWin = false) {
+  console.log("the game has ended!")
+  wss.clients.forEach(player =>{
+    player.send(JSON.stringify({
+      action:"end",
+      isImpostorWin,
+    }))
+  })
+  players.clear()
+  hostClient = null
+  gameJoinable = false
+  gameStarted = false
+}
 
-function endGame() {
-  console.log("the game is ending!")
+function checkEndGame(failCb = null) {
+  if (impostorCount == 0 || (players.size - impostorCount - killedPlayers.length < 2)) {
+    endGame(impostorCount != 0)
+  return {
+    win:true,
+    isImpostorWin: impostorCount != 0
+  }
+  }
+  failCb && failCb()
+  return false
 }
 
 function assignRandomTasks(impostors = 1) {
+  impostorCount = impostors
   const {readTasks} = require("../code_tools/read_all_files")
   const {amounts, taskEnableJson} = readTasks()
   for (let i = 0; i < impostors; i++){
