@@ -5,13 +5,15 @@ const playerData = {
     username: localStorage.getItem("username")
     }
 
-
 document.addEventListener("DOMContentLoaded", () => {
     customElements.define("task-counter", taskCounterObject)
 
     const nameField = document.getElementById("myUsername")
     nameField.textContent = playerData.username
+
     const taskCounter = new taskCounterObject("taskCounter")
+    const actionBarDiv = document.getElementById("Actionbar")
+
     const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
     socket.addEventListener("open", () =>{
         console.log("Started socket!")
@@ -22,8 +24,49 @@ document.addEventListener("DOMContentLoaded", () => {
         switch (messageJSON.action) {
             case "start":
                 isImpostor = messageJSON.impostor
+                const buttonPressFunctions = {
+                    "DiedIcon": function(){
+                        if (!isImpostor) {
+                           actionBarDiv.classList.add("invisible")
+                           taskCounter.classList.add("invisible")
+                           socket.send(JSON.stringify({
+                            event:"died"
+                           }))
+                        }
+                    },
+                    "TasklistIcon":function(){
+                        document.getElementById("taskDiv").classList.add("active")
+                        actionBarDiv.classList.add("inactive")
+                    },
+                    "ReportIcon":function(){
+                        socket.send(JSON.stringify({
+                            event:"report"
+                        }))
+                        //Add a spam-protection Layer, approved layer? Perhaps another Object?
+                    },
+                    "ScanIcon":function(){
+                        actionBarDiv.classList.add("inactive")
+                        //Scan the QR-code...
+                        //display task
+                        window.addEventListener("taskComplete", event =>{
+                            //hide task...
+                            socket.send(JSON.stringify({
+                                "event":"playerSend",
+                                "data": event
+                            }))
+                            actionBarDiv.classList.remove("inactive")
+                        })
+                    }
+                }
+                for (const item in buttonPressFunctions) {
+                    const thisDiv = document.getElementById(item)
+                    thisDiv.addEventListener("click", buttonPressFunctions[item])
+                }
                 doStartupAnimation(messageJSON, () =>{
                     taskCounter.classList.remove("invisible")
+
+
+                    actionBarDiv.classList.remove("inactive")
                 })
                 taskCounter.defineMaxTaskAmount(messageJSON.totalTaskAmount, messageJSON.playTime)
                 break
@@ -35,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 taskCounter.classList.add("invisible")
                 console.log(`You ${messageJSON.isImpostorWin == isImpostor ? "win" : "loose"}`)
             case "vote":
+                actionBarDiv.classList.add("inactive")
                 const skipBtn = document.getElementById("skipBtn")
                 skipBtn.addEventListener("click", () =>{
                     socket.send(JSON.stringify({
@@ -45,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.querySelectorAll(".player").forEach(selectedPlayer =>{
                         selectedPlayer.remove()
                     })
+                    actionBarDiv.classList.remove("inactive")
                 })
                 //Now vote for the players that are left...
                 console.log("Vote Started!")
@@ -80,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         document.querySelectorAll(".player").forEach(selectedPlayer =>{
                             selectedPlayer.remove()
                         })
+                        actionBarDiv.classList.remove("inactive")
                     })
                     //container.appendChild(playerDiv)
                     container.insertBefore(playerDiv, skipBtn.parentElement)
@@ -121,6 +167,15 @@ function doStartupAnimation(messageJSON, cb) {
         taskView.classList.remove("invisible")
         taskView.classList.add("menueOptionWindow")
         taskView.addEventListener("animationend", () =>{
+            const closeTaskView = document.createElement("img")
+            closeTaskView.src = "/pictures/exitIcon.png"
+            closeTaskView.classList.add("Closeicon")
+            taskView.appendChild(closeTaskView)
+            closeTaskView.addEventListener("click", ()=>{
+                taskView.classList.remove("active")
+                document.getElementById("Actionbar").classList.remove("inactive")
+            })
+
             const beQuietDiv = document.getElementById("beQuietDiv")
             beQuietDiv.classList.remove("invisible")
             beQuietDiv.classList.add("menueOptionWindow")

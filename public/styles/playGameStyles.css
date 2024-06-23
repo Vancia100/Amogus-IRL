@@ -24,6 +24,42 @@
     to{right: -100%;}
 }
 
-.menueOptionWindow .active{
-right: 5vw;
+.active{
+right: 5vw !important; 
+}
+
+.Taskbar {
+    display: flex;
+    position: absolute;
+    width: 100vw;
+    bottom: 0%;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    transition: bottom 1s ease;
+    overflow: hidden;
+}
+.inactive{
+    bottom:-100% !important;
+}
+.TaskbarIcon {
+    flex: 1 1 125px;
+    text-align: center;
+    padding-top: 30px;
+}
+.TaskbarIcon img{
+    max-height: 20vh;
+    min-height: 75px;
+    cursor: pointer;
+}
+.TaskbarIcon img:hover{
+    border-radius: 20px;
+}
+
+.Closeicon{
+    position: absolute;
+    right: 0%;
+    top: 0%;
+    max-height: 8% !important;
+    min-height: 40px;
+    cursor: pointer;
 }
