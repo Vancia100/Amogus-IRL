@@ -19,6 +19,8 @@ let killedPlayers = []
 const voting = new Map()
 let currentGameTime = 0
 let impostorCount = 0
+let pushbackTaskcount = 0 //task completed that will be updated on a emergency meeting
+//Sets up for non updating task-meter option
 
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected')
@@ -49,6 +51,9 @@ wss.on('connection', (ws) => {
             console.log("Time ran out!")
             break
           case "vote":
+            incrementTaskCounter(pushbackTaskcount)
+            pushbackTaskcount = 0
+
             console.log("voting time!!!")
             currentGameTime = ms.time
             players.forEach(player =>{
@@ -80,11 +85,10 @@ wss.on('connection', (ws) => {
           break
         case "playerSend":
           console.log(`${ws.playerId} completed a task`)
-          wss.clients.forEach(player =>{
-            player.send(JSON.stringify({
-              action: "updateTaskCounter"
-            }))
-          })
+          ws.tasksLeft --
+          //if (taskbarupdateOption)
+          incrementTaskCounter(1)
+          //else pushbackTaskcount ++
           break
         case "myVote":
           voting.has(ms.player) ? voting.set(ms.player, voting.get(ms.player) +1) : voting.set(ms.player, 1)
@@ -142,12 +146,16 @@ wss.on('connection', (ws) => {
           break
         case "died":
           killedPlayers.push(ws.playerId)
+          //Needs to remove the tasks that this player has done from the global counter!
           checkEndGame(() =>{
-
+            pushbackTaskcount += ws.tasksLeft
           })
           break
         case "report":
           if (killedPlayers) {
+            incrementTaskCounter(pushbackTaskcount)
+            pushbackTaskcount = 0
+            
             killedPlayers.forEach(player=>{
               const playerSocket = players.get(player)
               playerSocket.send(JSON.stringify({
@@ -218,6 +226,15 @@ function endGame(isImpostorWin = false) {
   gameJoinable = false
   gameStarted = false
 }
+function incrementTaskCounter(amount) {
+  wss.clients.forEach(player =>{
+    player.send(JSON.stringify({
+      action: "updateTaskCounter",
+      event: "updateTaskCounter",
+      amount
+    }))
+  })
+}
 
 function checkEndGame(failCb = null) {
   if (impostorCount == 0 || (players.size - impostorCount - killedPlayers.length < 2)) {
@@ -256,6 +273,8 @@ function assignRandomTasks(impostors = 1) {
         tasks.push(filteredList.splice(Math.floor(filteredList.length * Math.random()), 1)[0])
       }
     }
+    player.tasksLeft = totalTaskAmount
+    
     totalTaskAmount = totalTaskAmount * (players.size - impostors)
     player.send(JSON.stringify({
       "action": "start",
