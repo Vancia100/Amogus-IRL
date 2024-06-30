@@ -13,6 +13,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const taskCounter = new taskCounterObject("taskCounter")
     const actionBarDiv = document.getElementById("Actionbar")
+    const buttonPressFunctions = {
+        "DiedIcon": function(){
+            if (!isImpostor) {
+               actionBarDiv.classList.add("invisible")
+               taskCounter.classList.add("invisible")
+               socket.send(JSON.stringify({
+                event:"died"
+               }))
+            }else{
+                console.log("you can't be killed!")
+            }
+        },
+        "TasklistIcon":function(){
+            document.getElementById("taskDiv").classList.add("active")
+            actionBarDiv.classList.add("inactive")
+        },
+        "ReportIcon":function(){
+            socket.send(JSON.stringify({
+                event:"report"
+            }))
+            //Add a spam-protection Layer, approved layer? Perhaps another Object?
+        },
+        "ScanIcon":function(){
+            actionBarDiv.classList.add("inactive")
+            //Scan the QR-code...
+            //display task
+            window.addEventListener("taskComplete", event =>{
+                //hide task...
+                socket.send(JSON.stringify({
+                    "event":"playerSend",
+                    "data": event
+                }))
+                actionBarDiv.classList.remove("inactive")
+            })
+        }
+    }
+    
 
     const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
     socket.addEventListener("open", () =>{
@@ -24,47 +61,13 @@ document.addEventListener("DOMContentLoaded", () => {
         switch (messageJSON.action) {
             case "start":
                 isImpostor = messageJSON.impostor
-                const buttonPressFunctions = {
-                    "DiedIcon": function(){
-                        if (!isImpostor) {
-                           actionBarDiv.classList.add("invisible")
-                           taskCounter.classList.add("invisible")
-                           socket.send(JSON.stringify({
-                            event:"died"
-                           }))
-                        }
-                    },
-                    "TasklistIcon":function(){
-                        document.getElementById("taskDiv").classList.add("active")
-                        actionBarDiv.classList.add("inactive")
-                    },
-                    "ReportIcon":function(){
-                        socket.send(JSON.stringify({
-                            event:"report"
-                        }))
-                        //Add a spam-protection Layer, approved layer? Perhaps another Object?
-                    },
-                    "ScanIcon":function(){
-                        actionBarDiv.classList.add("inactive")
-                        //Scan the QR-code...
-                        //display task
-                        window.addEventListener("taskComplete", event =>{
-                            //hide task...
-                            socket.send(JSON.stringify({
-                                "event":"playerSend",
-                                "data": event
-                            }))
-                            actionBarDiv.classList.remove("inactive")
-                        })
-                    }
-                }
                 for (const item in buttonPressFunctions) {
                     const thisDiv = document.getElementById(item)
-                    thisDiv.addEventListener("click", buttonPressFunctions[item])
+                    thisDiv._function = buttonPressFunctions[item]
+                    thisDiv.addEventListener("click", thisDiv._function)
                 }
                 doStartupAnimation(messageJSON, () =>{
                     taskCounter.classList.remove("invisible")
-
 
                     actionBarDiv.classList.remove("inactive")
                 })
@@ -129,7 +132,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                     //container.appendChild(playerDiv)
                     container.insertBefore(playerDiv, skipBtn.parentElement)
-                });
+                })
+            case "deley":
+                const reportDiv = document.getElementById("ReportIcon")
+                reportDiv.removeEventListener("click", reportDiv._function)
+                //add a loading icon?
+                setTimeout(() =>{
+                    reportDiv.addEventListener("click", reportDiv._function)
+                }, 7000)
+                break
             default:
                 console.log(messageJSON)
         }
@@ -156,13 +167,26 @@ function doStartupAnimation(messageJSON, cb) {
     startScreen.classList.add("menueOptionWindow")
     
     startScreen.addEventListener("animationend", () =>{
+        const taskWork = document.getElementById("taskWork")
         const taskView = document.getElementById("taskDiv")
         for (const task of messageJSON.tasks) {
             console.log(task)
             const thisTaskDiv = document.createElement("div")
+            thisTaskDiv.id = task.name.replace(/ /g, "-").toLowerCase()
             thisTaskDiv.classList.add("box2", "text1")
             thisTaskDiv.textContent = task.name
             taskView.appendChild(thisTaskDiv)
+            //Temporary system to access the tasks until the QR-reader is done
+            thisTaskDiv._function = function (){
+                const fetchedTask = fetch(`/tasks/${thisTaskDiv.id}/${task.directory}`)
+                console.log(fetchedTask)
+                taskWork.innerHTML = fetchedTask
+            }
+
+            setTimeout(() =>{
+                thisTaskDiv.addEventListener("click", thisTaskDiv._function)
+            }, 3000)
+            //Done here...
         }
         taskView.classList.remove("invisible")
         taskView.classList.add("menueOptionWindow")

@@ -69,6 +69,7 @@ class taskCounterObject extends HTMLElement{
 
     updateTaskCount(amount = 1) {
         this.currentTaskCount += amount
+        console.log(this._baseElement.childNodes)
         this._baseElement.childNodes[0].childNodes[0].style.width = 
         `${this.currentTaskCount * 100/this._maxTask}%`
     }

@@ -145,6 +145,7 @@ wss.on('connection', (ws) => {
           }
           break
         case "died":
+          console.log(ws.playerId, "died")
           killedPlayers.push(ws.playerId)
           //Needs to remove the tasks that this player has done from the global counter!
           checkEndGame(() =>{
@@ -152,7 +153,7 @@ wss.on('connection', (ws) => {
           })
           break
         case "report":
-          if (killedPlayers) {
+          if (killedPlayers.length > 0) {
             incrementTaskCounter(pushbackTaskcount)
             pushbackTaskcount = 0
             
@@ -170,11 +171,14 @@ wss.on('connection', (ws) => {
               }))
             })
             killedPlayers = []
-            hostClient.send({
-
-            })
+            hostClient.send(JSON.stringify({
+              action:"report",
+              playerList: [...players.keys()]
+            }))
           }else {
-            ws.send("ERR")
+            ws.send(JSON.stringify({
+              action:"deley"
+            }))
           }
         break
         default:
