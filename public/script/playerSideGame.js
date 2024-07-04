@@ -167,7 +167,7 @@ function doStartupAnimation(messageJSON, cb) {
     startScreen.classList.add("menueOptionWindow")
     
     startScreen.addEventListener("animationend", () =>{
-        const taskWork = document.getElementById("taskWork")
+        const taskWork = document.getElementById("taskOutline")
         const taskView = document.getElementById("taskDiv")
         for (const task of messageJSON.tasks) {
             console.log(task)
@@ -178,13 +178,16 @@ function doStartupAnimation(messageJSON, cb) {
             taskView.appendChild(thisTaskDiv)
             //Temporary system to access the tasks until the QR-reader is done
             thisTaskDiv._function = function (){
-                const fetchedTask = fetch(`/tasks/${thisTaskDiv.id}/${task.directory}`)
-                console.log(fetchedTask)
-                taskWork.innerHTML = fetchedTask
+                fetch(`/tasks/${thisTaskDiv.id}/${task.directory}`).then(fetchedTask  =>{
+                    if (!fetchedTask.ok) throw "Error reading task"
+                    console.log(fetchedTask)
+                    taskWork.innerHTML = fetchedTask
+                })
             }
 
             setTimeout(() =>{
                 thisTaskDiv.addEventListener("click", thisTaskDiv._function)
+                thisTaskDiv.style.cursor = "pointer"
             }, 3000)
             //Done here...
         }
