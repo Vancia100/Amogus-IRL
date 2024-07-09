@@ -1,6 +1,9 @@
 //TASKS CAN NOT USE 
 //import somefunction from "./someother.js"
 
-document.addEventListener("DOMContentLoaded", () =>{
-    console.log("The script works")
-})
+const finishEvent = new CustomEvent("taskComplete")
+
+function finishGame() {
+    console.log("click!")
+    window.dispatchEvent(finishEvent)
+}

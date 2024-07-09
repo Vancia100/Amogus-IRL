@@ -5,6 +5,7 @@ const app = express();
 const indexRouter = require("./routes/index");
 const hostRouter = require("./routes/host")
 const playRouter = require("./routes/play.js")
+const taskRouter = require("./routes/taskRouter.js")
 
 // Serve static files from the "public" directory
 app.use(express.static("public"));
@@ -17,7 +18,7 @@ app.use(expressLayouts);
 app.use("/", indexRouter);
 app.use("/host", hostRouter)
 app.use("/play", playRouter)
-
+app.use("/task", taskRouter)
 
 app.listen(process.env.PORT || 80, () => {
   console.log("Server is running on port " + (process.env.PORT || 80));

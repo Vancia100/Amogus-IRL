@@ -1,3 +1,10 @@
-.steeze{
-    font-size: large;
+#taskFinishButton{
+    align-items: center;
+    text-align: center;
+    font-size: 2.5rem;
+    border: 1px solid black;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: rgb(32, 32, 41);
+    color: rgb(255, 255, 255);
 }

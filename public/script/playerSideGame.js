@@ -13,6 +13,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const taskCounter = new taskCounterObject("taskCounter")
     const actionBarDiv = document.getElementById("Actionbar")
+    const taskWork = document.getElementById("taskOutline")
+    //Handle task complete event
+    let currentTask = null
+    window.addEventListener("taskComplete", event =>{
+        socket.send(JSON.stringify({
+            "event":"playerSend",
+            "data": event
+        }))
+        actionBarDiv.classList.remove("inactive")
+        taskWork.classList.remove("active")
+        const comepletedTask = document.getElementById(currentTask)
+        comepletedTask.removeEventListener("click", comepletedTask._function)
+        comepletedTask.style.cursor = "default"
+        const checkMark = document.createElement("img")
+        checkMark.src = "/pictures/checkMark.png"
+        checkMark.classList.add("check-mark")
+        comepletedTask.appendChild(checkMark)
+        currentTask = null
+    })
+    //Handle buttonpresses
     const buttonPressFunctions = {
         "DiedIcon": function(){
             if (!isImpostor) {
@@ -36,17 +56,12 @@ document.addEventListener("DOMContentLoaded", () => {
             //Add a spam-protection Layer, approved layer? Perhaps another Object?
         },
         "ScanIcon":function(){
-            actionBarDiv.classList.add("inactive")
+            if(currentTask) {
+                actionBarDiv.classList.add("inactive")
+                taskWork.classList.add("active")
+            }
             //Scan the QR-code...
             //display task
-            window.addEventListener("taskComplete", event =>{
-                //hide task...
-                socket.send(JSON.stringify({
-                    "event":"playerSend",
-                    "data": event
-                }))
-                actionBarDiv.classList.remove("inactive")
-            })
         }
     }
     
@@ -152,63 +167,98 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.addEventListener("close", () =>{
         window.location = "/"
     })
-})
-function doStartupAnimation(messageJSON, cb) {
-    const startScreen = document.getElementById("startScreen")
-    startScreen.innerHTML = ""
-    const playerImpostorScreen = document.createElement("img")
-    playerImpostorScreen.src = `/pictures/playericon.svg`
-    //replace first instance with impostor.svg once the icon is made
-    const playerImpostorText = document.createElement("div")
-    playerImpostorText.textContent = `You are ${messageJSON.impostor ? "the Impostor" : "a Crewmate"}`
-    playerImpostorText.classList.add("text1")
-    startScreen.appendChild(playerImpostorScreen)
-    startScreen.appendChild(playerImpostorText)
-    startScreen.classList.add("menueOptionWindow")
+
+    function doStartupAnimation(messageJSON, cb) {
+        const startScreen = document.getElementById("startScreen")
+        startScreen.innerHTML = ""
+        const playerImpostorScreen = document.createElement("img")
+        playerImpostorScreen.src = `/pictures/playericon.svg`
+        //replace first instance with impostor.svg once the icon is made
+        const playerImpostorText = document.createElement("div")
+        playerImpostorText.textContent = `You are ${messageJSON.impostor ? "the Impostor" : "a Crewmate"}`
+        playerImpostorText.classList.add("text1")
+        startScreen.appendChild(playerImpostorScreen)
+        startScreen.appendChild(playerImpostorText)
+        startScreen.classList.add("menueOptionWindow")
+        
+        startScreen.addEventListener("animationend", () =>{
+            const taskView = document.getElementById("taskDiv")
+            for (const task of messageJSON.tasks) {
+                console.log(task)
+                const thisTaskDiv = document.createElement("div")
+                thisTaskDiv.id = task.name.replace(/ /g, "-").toLowerCase()
+                thisTaskDiv.classList.add("box2", "text1")
+                thisTaskDiv.textContent = task.name
+                taskView.appendChild(thisTaskDiv)
+                //Temporary system to access the tasks until the QR-reader is done
+                thisTaskDiv._function = function (){
+                    if(!currentTask){
+                        fetch(`/task/${thisTaskDiv.id}`).then(fetchedTask  =>{
+                            if (!fetchedTask.ok) throw "Error reading task"
+                            return fetchedTask.text()
+                        })
+                        .then(html =>{
+                            currentTask = thisTaskDiv.id
+                            taskWork.innerHTML = html
+                            taskView.classList.remove("active")
+                            taskWork.classList.add("active")
+                            const closeTaskView = document.createElement("img")
+                            closeTaskView.src = "/pictures/exitIcon.png"
+                            closeTaskView.classList.add("Closeicon")
+                            taskWork.appendChild(closeTaskView)
+                            closeTaskView.addEventListener("click", () => {
+                                taskWork.classList.remove("active")
+                                actionBarDiv.classList.remove("inactive")
+                            })
+
+                            //refresh Scripts...
+                            const scripts = taskWork.querySelectorAll("script")
+                            scripts.forEach(script =>{
+                                const newScript = document.createElement("script")
+                                if (script.src) {
+                                    newScript.src = script.src
+                                } else {
+                                    newScript.textContent = script.textContent
+                                }
+                                Array.from(script.attributes).forEach(attr =>{
+                                    newScript.setAttribute(attr.name, attr.value)
+                                })
+                                script.parentNode.replaceChild(newScript, script)
+                            })
+                        })
+                        .catch(err =>{
+                            console.error(err)
+                        })
+                    }else{
+                        taskWork.classList.add("active")
+                        taskView.classList.remove("active")
+                    }
+                }
     
-    startScreen.addEventListener("animationend", () =>{
-        const taskWork = document.getElementById("taskOutline")
-        const taskView = document.getElementById("taskDiv")
-        for (const task of messageJSON.tasks) {
-            console.log(task)
-            const thisTaskDiv = document.createElement("div")
-            thisTaskDiv.id = task.name.replace(/ /g, "-").toLowerCase()
-            thisTaskDiv.classList.add("box2", "text1")
-            thisTaskDiv.textContent = task.name
-            taskView.appendChild(thisTaskDiv)
-            //Temporary system to access the tasks until the QR-reader is done
-            thisTaskDiv._function = function (){
-                fetch(`/tasks/${thisTaskDiv.id}/${task.directory}`).then(fetchedTask  =>{
-                    if (!fetchedTask.ok) throw "Error reading task"
-                    console.log(fetchedTask)
-                    taskWork.innerHTML = fetchedTask
-                })
+                setTimeout(() =>{
+                    thisTaskDiv.addEventListener("click", thisTaskDiv._function)
+                    thisTaskDiv.style.cursor = "pointer"
+                }, 3000)
+                //Done here...
             }
-
-            setTimeout(() =>{
-                thisTaskDiv.addEventListener("click", thisTaskDiv._function)
-                thisTaskDiv.style.cursor = "pointer"
-            }, 3000)
-            //Done here...
-        }
-        taskView.classList.remove("invisible")
-        taskView.classList.add("menueOptionWindow")
-        taskView.addEventListener("animationend", () =>{
-            const closeTaskView = document.createElement("img")
-            closeTaskView.src = "/pictures/exitIcon.png"
-            closeTaskView.classList.add("Closeicon")
-            taskView.appendChild(closeTaskView)
-            closeTaskView.addEventListener("click", ()=>{
-                taskView.classList.remove("active")
-                document.getElementById("Actionbar").classList.remove("inactive")
-            })
-
-            const beQuietDiv = document.getElementById("beQuietDiv")
-            beQuietDiv.classList.remove("invisible")
-            beQuietDiv.classList.add("menueOptionWindow")
-            beQuietDiv.addEventListener("animationend", () =>{
-                cb && cb()
+            taskView.classList.remove("invisible")
+            taskView.classList.add("menueOptionWindow")
+            taskView.addEventListener("animationend", () =>{
+                const closeTaskView = document.createElement("img")
+                closeTaskView.src = "/pictures/exitIcon.png"
+                closeTaskView.classList.add("Closeicon")
+                taskView.appendChild(closeTaskView)
+                closeTaskView.addEventListener("click", () => {
+                    taskView.classList.remove("active")
+                    actionBarDiv.classList.remove("inactive")
+                })
+                const beQuietDiv = document.getElementById("beQuietDiv")
+                beQuietDiv.classList.remove("invisible")
+                beQuietDiv.classList.add("menueOptionWindow")
+                beQuietDiv.addEventListener("animationend", () =>{
+                    cb && cb()
+                })
             })
         })
-    })
-}
+    }
+})

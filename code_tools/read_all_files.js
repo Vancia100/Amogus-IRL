@@ -49,5 +49,5 @@ function loopTasks(cb) {
         }
         return taskEnableJson
 }
-module.exports = {readTasks, getQRCodes}
+module.exports = {readTasks, getQRCodes, loopTasks}
 //console.log(readTasks())
