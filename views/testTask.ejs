@@ -1,0 +1,74 @@
+<link rel="stylesheet" href="/styles/playGameStyles.css">
+
+<div id="taskDiv" class="menueOptionsWindow active">
+    <div class="text1 box2">Tasks:</div>
+    <% for (var taskThing in taskList) {%>
+    <div id=<%=taskThing.replace(/ /g, "-").toLowerCase()%> class="box2 text1 taskItem">
+        <%= taskThing %>
+    </div>
+    <% } %>
+</div>
+<div id="taskOutline">
+
+</div>
+
+<script>
+    const taskView = document.getElementById("taskDiv")
+    const taskWork = document.getElementById("taskOutline")
+    let currentTask = null
+    
+    //Copied and altered vertion from playerSideGame.js
+    //Perhaps use ejs in play.ejs to prevent having to create a task Instance for each task
+    document.querySelectorAll(".taskItem").forEach(thisTaskDiv =>{
+        console.log(thisTaskDiv.id)
+        thisTaskDiv._function = function (){
+                    if(!currentTask){
+                        fetch(`/task/${thisTaskDiv.id}`).then(fetchedTask  =>{
+                            if (!fetchedTask.ok) throw "Error reading task"
+                            return fetchedTask.text()
+                        })
+                        .then(html =>{
+                            currentTask = thisTaskDiv.id
+                            taskWork.innerHTML = html
+                            taskView.classList.remove("active")
+                            taskWork.classList.add("active")
+
+                            //refresh Scripts...
+                            const scripts = taskWork.querySelectorAll("script")
+                            scripts.forEach(script =>{
+                                const newScript = document.createElement("script")
+                                if (script.src) {
+                                    newScript.src = script.src
+                                } else {
+                                    newScript.textContent = script.textContent
+                                }
+                                Array.from(script.attributes).forEach(attr =>{
+                                    newScript.setAttribute(attr.name, attr.value)
+                                })
+                                script.parentNode.replaceChild(newScript, script)
+                            })
+                        })
+                        .catch(err =>{
+                            console.error(err)
+                        })
+                    }else{
+                        taskWork.classList.add("active")
+                        taskView.classList.remove("active")
+                    }
+                }
+        thisTaskDiv.addEventListener("click", thisTaskDiv._function)
+        thisTaskDiv.style.cursor = "pointer"
+
+        window.addEventListener("taskComplete", event =>{
+        taskWork.classList.remove("active")
+        const comepletedTask = document.getElementById(currentTask)
+        comepletedTask.removeEventListener("click", comepletedTask._function)
+        comepletedTask.style.cursor = "default"
+        const checkMark = document.createElement("img")
+        checkMark.src = "/pictures/checkMark.png"
+        checkMark.classList.add("check-mark")
+        comepletedTask.appendChild(checkMark)
+        currentTask = null
+    })
+    })
+    </script>
