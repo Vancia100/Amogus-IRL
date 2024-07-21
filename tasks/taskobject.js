@@ -77,10 +77,16 @@ function copyFiles(source, thisName, ejsSettings){
                 }
             }
 
-            //chat GPT code, no clue how it works but it does
             const bodyTags = htmlData.indexOf('<body>')
+            let bodyContent = htmlData.substring(bodyTags + 6, htmlData.indexOf('</body>'));
             if (bodyTags === -1) throw `${item} does not have a valid HTML body!`
-            const bodyContent = htmlData.substring(bodyTags + 6, htmlData.indexOf('</body>'));
+
+            const linkTagsIndex = htmlData.indexOf("<link")
+            if (linkTagsIndex < bodyTags && linkTagsIndex != -1){
+                const headContent = htmlData.substring(0, bodyTags)
+                const linkTags = headContent.match(/<link\b[^>]*>/gi)
+                bodyContent = `${linkTags.join("\n")}\n${bodyContent}`
+            }
 
             const modifiedHTML = bodyContent.replace(/(src="|href=")([^"]+)/g, (match, p1, p2) => {
                 // Add the taskName prefix to URLs
