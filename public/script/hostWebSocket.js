@@ -90,7 +90,10 @@ root,
 clr,
 }){
 fetchSVG(svg =>{
-  root.innerHTML =
+  const playerDiv = document.createElement("div")
+  playerDiv.id = username
+  playerDiv.classList.add("player")
+  playerDiv.innerHTML =
   `
   <div id="${username}" class="player">
     <div class="playerIconDiv">
@@ -101,8 +104,10 @@ fetchSVG(svg =>{
     </div>
   </div>
   `
+
+root.appendChild(playerDiv)
 //Hydration in the hydration...
-const playerDiv = document.getElementById(username)
+
 playerDiv.querySelector(".cls-2").setAttribute("fill", clr)
 //Kick players
 playerDiv._clickHandler = function () {
