@@ -1,19 +1,18 @@
 import taskCounterObject from "./Object/taskCounterObject.js"
+
 let isImpostor = false
 const playerData = {
     event: "join",
-    username: localStorage.getItem("username")
+    username: localStorage.getItem("username"),
+    clr: `#${Math.floor(Math.random() * (256**3)).toString(16)}`
     }
 
 document.addEventListener("DOMContentLoaded", () => {
     customElements.define("task-counter", taskCounterObject)
-
-    const nameField = document.getElementById("myUsername")
-    nameField.textContent = playerData.username
-
     const taskCounter = new taskCounterObject("taskCounter")
     const actionBarDiv = document.getElementById("Actionbar")
     const taskWork = document.getElementById("taskOutline")
+    
     //Handle task complete event
     let currentTask = null
     window.addEventListener("taskComplete", event =>{
@@ -32,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         comepletedTask.appendChild(checkMark)
         currentTask = null
     })
+
     //Handle buttonpresses
     const buttonPressFunctions = {
         "DiedIcon": function(){
@@ -67,6 +67,29 @@ document.addEventListener("DOMContentLoaded", () => {
     
 
     const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
+
+    //Controlls the avatar colour picker system
+    const nameField = document.getElementById("myUsername")
+    nameField.querySelector("h2").textContent = playerData.username
+    const svgIcon = document.getElementById("svg1")
+    const clrPicker = nameField.querySelector("input[type=color]")
+    clrPicker.value = playerData.clr
+    nameField.addEventListener("click", () => clrPicker.click())
+    svgIcon.querySelector(".cls-2").setAttribute("fill", playerData.clr)
+    clrPicker.addEventListener("input", (e)=>{
+        console.log(svgIcon.querySelector(".cls-2"))
+        svgIcon.querySelector(".cls-2").setAttribute("fill", e.target.value)
+    })
+    clrPicker.addEventListener("change", (e) => {
+        socket.send(JSON.stringify({
+            sendToHost:true,
+            event: "clrChange",
+            clr: e.target.value,    
+            player: playerData.username
+        }))
+    })
+
+    //Socket things
     socket.addEventListener("open", () =>{
         console.log("Started socket!")
         socket.send(JSON.stringify(playerData))

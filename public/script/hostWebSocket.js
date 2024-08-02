@@ -5,16 +5,24 @@ const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
 const livePlayers = []
 
 document.addEventListener("DOMContentLoaded", () =>{
+  //Start game
   const startBtn = document.getElementById("startGameBtn")
   startBtn.addEventListener("click", startGameBtn)
+
   const emergencyBtn = document.getElementById("emergencyButton")
   customElements.define("task-counter", taskCounterObject)
+
+  //Counter
   const taskCounter = new taskCounterObject("taskCounter")
   const container = document.getElementById("playerContainer")
+
+  //Start socket
   socket.addEventListener("open", () =>{
     console.log("Started socket!")
     socket.send(JSON.stringify({client: "HOST"}))
   })
+
+  //On message
   socket.addEventListener("message", (message) => {
     const messageJSON = JSON.parse(message.data)
     console.log(messageJSON)
@@ -22,34 +30,11 @@ document.addEventListener("DOMContentLoaded", () =>{
       case "join":
         updatePlayerCount()
         console.log("Tied adding box")
-        const playerDiv = document.createElement("div")
-        const playerText = document.createElement("h2")
-        const playerIcon = document.createElement("img")
-        const playerIconDiv = document.createElement("div")
-        const playerTextDiv = document.createElement("div")
-        playerIconDiv.classList.add("playerIconDiv")
-        playerTextDiv.classList.add("playerTextDiv")
-        playerIcon.id = `icon-${messageJSON.username}`
-        playerIcon.src = "/pictures/playericon.svg"
-        playerIcon.classList.add("playerIcon")
-        playerIcon.width = "55"
-        playerText.textContent = messageJSON.username
-        playerText.classList.add("text1")
-        playerDiv.classList.add("player")
-        playerDiv.id = messageJSON.username
-        playerIconDiv.appendChild(playerIcon)
-        playerTextDiv.appendChild(playerText)
-        playerDiv.appendChild(playerIconDiv)
-        playerDiv.appendChild(playerTextDiv)
-        playerDiv._clickHandler = function () {
-          socket.send(JSON.stringify({
-            client:"HOST",
-            event: "kick",
-            player: playerDiv.id
-          }))
-        }
-        playerDiv.addEventListener("click", playerDiv._clickHandler)
-        container.appendChild(playerDiv)
+        hydrateHTML({
+          root: container,
+          username: messageJSON.username,
+          clr: messageJSON.clr
+        })
         break
       case "kick":
         console.log("Tried kicking player", messageJSON.player)
@@ -80,6 +65,12 @@ document.addEventListener("DOMContentLoaded", () =>{
         taskCounter.timerCount = messageJSON.time
         taskCounter.startTimer()
         break
+
+      case "clrChange":
+        const thisPlayerDiv = document.getElementById(messageJSON.player)
+        console.log(thisPlayerDiv)
+        thisPlayerDiv.querySelector(".cls-2").setAttribute("fill", messageJSON.clr)
+        break
       default:
         console.error("Unknown message recived from WS")
     }
@@ -90,20 +81,49 @@ document.addEventListener("DOMContentLoaded", () =>{
   socket.addEventListener("close", () =>{
       //window.location = "/"
   })
-  setTimeout(() =>{
-    emergencyBtn.addEventListener("click", e =>{
-      taskCounter.stopTimer()
-      emergencyBtn.classList.add("invisible")
-      socket.send(JSON.stringify({
-        client:"HOST",
-        event:"vote",
-        time:taskCounter.timerCount
-      }))
-      //Wait for another press?
-      container.classList.remove("invisible")
-    })
-  }, 10000)
 })
+
+//Some react looking ass shit right here ("But without intellisense")
+function hydrateHTML({
+username,
+root,
+clr,
+}){
+fetchSVG(svg =>{
+  root.innerHTML =
+  `
+  <div id="${username}" class="player">
+    <div class="playerIconDiv">
+      ${svg}
+    </div>
+    <div class="playerTextDiv">
+      <h2 class="text1">${username}</h2>
+    </div>
+  </div>
+  `
+//Hydration in the hydration...
+const playerDiv = document.getElementById(username)
+playerDiv.querySelector(".cls-2").setAttribute("fill", clr)
+//Kick players
+playerDiv._clickHandler = function () {
+  socket.send(JSON.stringify({
+    client:"HOST",
+    event: "kick",
+    player: playerDiv.id
+  }))
+}
+playerDiv.addEventListener("click", playerDiv._clickHandler)
+
+
+})
+}
+
+
+function fetchSVG(cb) {
+  fetch("/pictures/playericon1.svg").then(res =>res.text())
+  .then(svg => cb(svg))
+  .catch(e => console.log("There was an error fetching the icon", e))
+}
 
 function startGameBtn() {
   console.log("Tried Starting game")
@@ -118,6 +138,21 @@ function startGameBtn() {
     containers.forEach(item =>{
       item.classList.add("invisible")
     })
+
+    //Delay on emergency button
+    setTimeout(() =>{
+      emergencyBtn.addEventListener("click", e =>{
+        taskCounter.stopTimer()
+        emergencyBtn.classList.add("invisible")
+        socket.send(JSON.stringify({
+          client:"HOST",
+          event:"vote",
+          time:taskCounter.timerCount
+        }))
+        //Wait for another press?
+        container.classList.remove("invisible")
+      })
+    }, 10000)
   } else{
     console.log("Not enough players!")
   }

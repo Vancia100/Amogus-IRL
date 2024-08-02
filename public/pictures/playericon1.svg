@@ -1,50 +1,5 @@
-<link rel="stylesheet" href="/styles/playGameStyles.css">
-<link rel="stylesheet" href="\styles\playerList.css">
-
-<div id="taskCounter" class="invisible"> 
-    
-</div>
-
-<div id="taskDiv" class="invisible">
-    <div class="text1 box2">Tasks:</div>
-</div>
-
-<div id="beQuietDiv" class="invisible">
-    <img src="/pictures/playericon.svg" alt="">
-</div>
-<div id="taskOutline">
-    <img src="/pictures/exiticon.png" alt="" class="Closeicon">
-</div>
-<div class="container invisible" id="playerContainer">
-    <div style="width: 100%; text-align: center; margin-bottom: 5vh;">
-        <h2 class="text1" style="font-size: 10vh;">
-            Who is the impostor:
-        </h2>
-    </div>
-
-    <div style="width: 100%; text-align: center; margin-top: 5vh;">
-        <div class="button" id="skipBtn">
-            <h2 class="text1" style="font-size: 10vh;">
-                Skip Vote
-            </h2>
-        </div>
-    </div>
-</div>
-<div id="startScreen" style="text-align: center;">
-    <div class = box>
-        <h1>GAyming time</h1>
-    </div>
-    
-    <div class="box">
-        <h2>
-            See your name on the host screen?
-        </h2>
-    </div>
-    
-    <div id="myUsername">
-        <input type="color" style="display: none;" id="svgInput">
-    <svg
-    height="90%"
+<svg
+   height="90%"
    viewBox="0 0 361.25366 413.72086"
    version="1.1"
    id="svg1"
@@ -87,24 +42,3 @@
          d="m 148.01939,42.031809 c 10.68746,-0.127232 21.37492,0.148436 31.90335,2.120528 10.52843,1.972092 17.40954,8.026199 19.93297,18.597034 1.57979,6.57364 -0.66797,12.256659 -6.19195,16.116024 -5.14228,3.59429 -11.03734,5.37553 -16.96423,7.01895 a 88.50026,88.50026 0 0 1 -40.9262,1.96148 39.091946,39.091946 0 0 1 -18.26835,-8.94862 c -7.35824,-6.361593 -8.17464,-20.14503 -4.35769,-26.835296 2.68247,-4.686368 6.90233,-7.040155 11.93858,-8.227651 6.7963,-1.590397 13.78344,-1.664615 20.65395,-1.834258 0.77399,0.03181 1.51618,0.03181 2.27957,0.03181 z m 31.21418,34.320756 c 3.55188,-1.060263 10.13612,-1.813054 12.23545,-5.831453 1.30412,-2.512829 0.63615,-5.757234 0.26507,-6.944734 -2.12054,-6.99774 -7.13559,-10.475412 -14.05911,-11.599292 -13.15788,-2.120524 -26.42179,-2.226557 -39.69629,-1.547987 -2.67187,0.137835 -5.30133,0.413507 -8.48212,0.667968 a 7.0189498,7.0189498 0 0 0 -4.24105,2.120533 c -2.64007,2.852107 -1.54799,7.835347 -1.1875,9.425746 1.68582,7.421848 8.76838,15.755529 17.62159,17.229299 9.2031,1.45256 22.60484,0.67857 37.54396,-3.54129 z"
          id="path4-2"
          style="display:inline;fill:#010101;fill-opacity:1;stroke-width:1.06027" /></g></g></svg>
-        <h2 class="text1">
-        
-        </h2>
-    </div>
-</div>
-<div class="Taskbar inactive" id="Actionbar">
-    <div class="TaskbarIcon" id="DiedIcon">
-        <img src="/pictures/diedicon.png" alt="">
-    </div>
-    <div class="TaskbarIcon" id="TasklistIcon">
-        <img src="/pictures/taskicon.png" alt="">
-    </div>
-    <div class="TaskbarIcon" id="ScanIcon">
-        <img src="/pictures/scanicon.png" alt="">
-    </div>
-    <div class="TaskbarIcon" id="ReportIcon">
-        <img src="/pictures/diedicon.png" alt="">
-    </div>
-</div>
-
-<script type="module" src="/script/playerSideGame.js"> </script>

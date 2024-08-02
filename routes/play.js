@@ -27,6 +27,8 @@ wss.on('connection', (ws) => {
   ws.on('message', (message) => {
     ms = JSON.parse(message)
     console.log('Received message from client:', ms)
+
+    //If massage is from host
     if (ms.client == "HOST") {
       if (hostClient == null){
         gameJoinable = true
@@ -68,7 +70,12 @@ wss.on('connection', (ws) => {
         }
       }
     }
+
+    //If the game is started
     else if (hostClient) {
+      if (ms.sendToHost) {
+        hostClient.send(JSON.stringify(ms))
+      }
       switch (ms.event){
         case "join":
           if (players.has(ms.username)) {
@@ -80,6 +87,7 @@ wss.on('connection', (ws) => {
           players.set(ms.username, ws)
           ws.playerId = ms.username
           ws.impostor = false
+          ws.clr = ms.clr
           //ws.alive = true
           hostClient.send(JSON.stringify(ms))
           break
@@ -181,6 +189,9 @@ wss.on('connection', (ws) => {
             }))
           }
         break
+        case "clrChange":
+          ws.clr = ms.clr
+          break
         default:
           console.log("unknown command", ms)
       }
