@@ -3,7 +3,6 @@ class taskCounterObject extends HTMLElement{
         super()
         const baseElement = document.getElementById(id)
         if (!baseElement) throw "Wrongly entered id";
-        this._maxTask = null
         this.currentTaskCount = 0
         this._baseElement = baseElement
         
@@ -24,9 +23,10 @@ class taskCounterObject extends HTMLElement{
     }
 
     defineMaxTaskAmount(amount, timerCount, cb = null) {
-        this.maxTaskAmount = amount
+        this.maxTask = amount
         this.timerCount = timerCount
         const progressBar = document.createElement("div")
+        progressBar.id = "taskProgressBar"
         const baseHolder = document.createElement("div")
         this._timer = document.createElement("div")
         this.startTimer(cb)
@@ -69,9 +69,11 @@ class taskCounterObject extends HTMLElement{
 
     updateTaskCount(amount = 1) {
         this.currentTaskCount += amount
-        console.log(this._baseElement.childNodes)
-        this._baseElement.childNodes[0].childNodes[0].style.width = 
-        `${this.currentTaskCount * 100/this._maxTask}%`
+        document.getElementById("taskProgressBar").style.width = 
+        `${this.currentTaskCount * 100/this.maxTask}%`
+        if(this.currentTaskCount == this.maxTask) {
+            this._timerCallback && this._timerCallback()
+        }
     }
     stopTimer(){
         clearInterval(this._timerFunction)

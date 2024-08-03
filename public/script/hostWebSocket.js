@@ -52,6 +52,20 @@ document.addEventListener("DOMContentLoaded", () =>{
           playerDiv.removeEventListener("click", playerDiv._clickHandler)
           delete playerDiv._clickHandler
         })
+            //Delay on emergency button
+    setTimeout(() =>{
+      emergencyBtn.addEventListener("click", e =>{
+        taskCounter.stopTimer()
+        emergencyBtn.classList.add("invisible")
+        socket.send(JSON.stringify({
+          client:"HOST",
+          event:"vote",
+          time:taskCounter.timerCount
+        }))
+        //Wait for another press?
+        container.classList.remove("invisible")
+      })
+    }, 10000)
         break
       case "updateTaskCounter":
         taskCounter.updateTaskCount()
@@ -71,6 +85,11 @@ document.addEventListener("DOMContentLoaded", () =>{
         console.log(thisPlayerDiv)
         thisPlayerDiv.querySelector(".cls-2").setAttribute("fill", messageJSON.clr)
         break
+      case "end":
+        startBtn.remove()
+        taskCounter.remove()
+        //End game animation
+        break
       default:
         console.error("Unknown message recived from WS")
     }
@@ -79,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () =>{
       console.error("WebSocket error:", error)
   })
   socket.addEventListener("close", () =>{
-      //window.location = "/"
+      window.location = "/"
   })
 })
 
@@ -118,11 +137,8 @@ playerDiv._clickHandler = function () {
   }))
 }
 playerDiv.addEventListener("click", playerDiv._clickHandler)
-
-
 })
 }
-
 
 function fetchSVG(cb) {
   fetch("/pictures/playericon1.svg").then(res =>res.text())
@@ -143,21 +159,6 @@ function startGameBtn() {
     containers.forEach(item =>{
       item.classList.add("invisible")
     })
-
-    //Delay on emergency button
-    setTimeout(() =>{
-      emergencyBtn.addEventListener("click", e =>{
-        taskCounter.stopTimer()
-        emergencyBtn.classList.add("invisible")
-        socket.send(JSON.stringify({
-          client:"HOST",
-          event:"vote",
-          time:taskCounter.timerCount
-        }))
-        //Wait for another press?
-        container.classList.remove("invisible")
-      })
-    }, 10000)
   } else{
     console.log("Not enough players!")
   }
@@ -172,7 +173,7 @@ function endGame(){
     isImpostorWin:false
   }))
   setTimeout(() =>{
-    location.reload()
+    // location.reload()
   }, 6000)
 }
 

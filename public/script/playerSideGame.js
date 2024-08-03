@@ -16,10 +16,12 @@ document.addEventListener("DOMContentLoaded", () => {
     //Handle task complete event
     let currentTask = null
     window.addEventListener("taskComplete", event =>{
-        socket.send(JSON.stringify({
-            "event":"playerSend",
-            "data": event
-        }))
+        if (!isImpostor) {
+            socket.send(JSON.stringify({
+                "event":"playerSend",
+                "data": event
+            }))
+        }
         actionBarDiv.classList.remove("inactive")
         taskWork.classList.remove("active")
         const comepletedTask = document.getElementById(currentTask)
@@ -116,8 +118,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 break
             case "end":
                 //play endgame animation...
-                taskCounter.classList.add("invisible")
+                taskCounter.remove()
+                actionBarDiv.remove()
                 console.log(`You ${messageJSON.isImpostorWin == isImpostor ? "win" : "loose"}`)
+                break
             case "vote":
                 actionBarDiv.classList.add("inactive")
                 const skipBtn = document.getElementById("skipBtn")
@@ -171,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     //container.appendChild(playerDiv)
                     container.insertBefore(playerDiv, skipBtn.parentElement)
                 })
+                break
             case "deley":
                 const reportDiv = document.getElementById("ReportIcon")
                 reportDiv.removeEventListener("click", reportDiv._function)

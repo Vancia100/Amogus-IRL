@@ -53,7 +53,7 @@ wss.on('connection', (ws) => {
             console.log("Time ran out!")
             break
           case "vote":
-            incrementTaskCounter(pushbackTaskcount)
+            pushbackTaskcount && incrementTaskCounter(pushbackTaskcount)
             pushbackTaskcount = 0
 
             console.log("voting time!!!")
@@ -99,14 +99,16 @@ wss.on('connection', (ws) => {
           //else pushbackTaskcount ++
           break
         case "myVote":
-          voting.has(ms.player) ? voting.set(ms.player, voting.get(ms.player) +1) : voting.set(ms.player, 1)
-          console.log(voting)
-          let voteAmount = [...voting.values()].reduce((total, current) =>{
+          // Voting is a map of votes, defined on the top of the document
+          voting.has(ms.player) ? 
+          voting.set(ms.player, voting.get(ms.player) +1) : 
+          voting.set(ms.player, 1)
+          const voteAmount = [...voting.values()].reduce((total, current) =>{
             return total += current
           })
           console.log("Voting amount", voteAmount)
           if (voteAmount == players.size) {
-            console.log("Voting complete!")
+            //Puts out the player with the most votes
             const kickingPlayer = [...voting.entries()].reduce(([highestPlayer, highestCount], [player, count]) =>{
               return [
                 count > highestCount ? player : count == highestCount ? null :highestPlayer,
@@ -120,6 +122,7 @@ wss.on('connection', (ws) => {
                   time: currentGameTime,
                   },
                 ... function() {
+                  //First we define a function to run if the game resumes:
                   const resumeFunction = function(){
                     players.forEach(player =>{
                       player.send(JSON.stringify({
@@ -129,21 +132,30 @@ wss.on('connection', (ws) => {
                     })
                   }
 
+                  //Check if there is someone to be kicked:
                   if (kickingPlayer) {
                     const returnObj = {}
+                    //Voted out player "dies"
                     players.get(kickingPlayer).send(JSON.stringify({
                       action:"die"
                     }))
+                    //Defines what is to be sent to host
                     returnObj.player = kickingPlayer
-                    returnObj.impostor = false
                     if (players.get(kickingPlayer).impostor) {
                       returnObj.impostor = true,
                       impostorCount --
+                    } else{
+                      returnObj.impostor = false
                     }
                     players.delete(kickingPlayer)
+
+                    //Does the game end? if not: run the function.
                     checkEndGame(resumeFunction)
+
+                    //return object will be deconstructed and sent to the host
                     return returnObj
                   }
+                  //Nobody is killed, the games continues like usual
                   resumeFunction()
                   return {}
                 }()
@@ -189,6 +201,7 @@ wss.on('connection', (ws) => {
             }))
           }
         break
+        //Change colour
         case "clrChange":
           ws.clr = ms.clr
           break
@@ -228,11 +241,13 @@ router.post("/checkGame", (req, res) => {
     message: !gameJoinable ? players.has(inputUsername.username) ? "" : "Game not started" : "Username already in use"
   }))
 })
+
 function endGame(isImpostorWin = false) {
   console.log("the game has ended!")
   wss.clients.forEach(player =>{
     player.send(JSON.stringify({
       action:"end",
+      event:"end",
       isImpostorWin,
     }))
   })
@@ -268,8 +283,8 @@ function assignRandomTasks(impostors = 1) {
   const {readTasks} = require("../code_tools/read_all_files")
   const {amounts, taskEnableJson} = readTasks()
   for (let i = 0; i < impostors; i++){
-    impostors = [...players.keys()].splice(Math.floor(players.size * Math.random()), 1)[0]
-    players.get(impostors)["impostor"] = true
+    const impostorsPlayer = [...players.keys()].splice(Math.floor(players.size * Math.random()), 1)[0]
+    players.get(impostorsPlayer)["impostor"] = true
   }
   let totalTaskAmount = 0
   players.forEach(player =>{
