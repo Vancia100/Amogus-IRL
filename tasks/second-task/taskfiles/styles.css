@@ -1,0 +1,31 @@
+body{
+    background-color: black;
+}
+#base{
+    position: absolute;
+    right: 3%;
+    top: 3%;
+    width: 94%;
+    height: 94%;
+    border: 2px solid rgb(49, 28, 0);
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 25% 1fr 25%;
+    grid-row: repeat(4, 1fr);
+    border: 2px solid white;
+}
+.wireTab {
+    grid-column: 1;
+    border-right: 2px solid white;
+}   
+.wireClose{
+    color: white;
+    grid-column: 3;
+    border-left: 2px solid white;
+}
+
+.middleSection{
+    grid-column: 2;
+    grid-row-start: 1;
+    grid-row-end: span 4;
+}

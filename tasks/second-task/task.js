@@ -14,7 +14,6 @@ const ejsSettings = {"index.ejs": {name: "Not as sus task"}}
 ThisTask = new Task("Not as sus task", 
 "short",
  __dirname, 
- "/taskfiles/index.ejs", 
- ejsSettings)
+ "/taskfiles/index.html")
 
 module.exports = ThisTask
