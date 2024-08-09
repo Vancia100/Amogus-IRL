@@ -141,6 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 taskCounter.stopTimer()
                 const container = document.getElementById("playerContainer")
                 messageJSON.playerList.forEach(player => {
+                    //Perhaps treat this as the other one, making a string for readability?
                     const playerDiv = document.createElement("div")
                     container.classList.remove("invisible")
                     const playerText = document.createElement("h2")
@@ -170,11 +171,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         document.querySelectorAll(".player").forEach(selectedPlayer =>{
                             selectedPlayer.remove()
                         })
-                        actionBarDiv.classList.remove("inactive")
                     })
                     //container.appendChild(playerDiv)
                     container.insertBefore(playerDiv, skipBtn.parentElement)
                 })
+                break
+                case "resume":
+                    taskCounter.startTimer()
+                    actionBarDiv.classList.remove("inactive")
                 break
             case "deley":
                 const reportDiv = document.getElementById("ReportIcon")

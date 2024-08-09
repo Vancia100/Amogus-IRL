@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () =>{
         }
         taskCounter.timerCount = messageJSON.time
         taskCounter.startTimer()
+        container.classList.add("invisible")
         break
 
       case "clrChange":
