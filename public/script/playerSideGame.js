@@ -140,28 +140,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log("Vote Started!")
                 taskCounter.stopTimer()
                 const container = document.getElementById("playerContainer")
-                messageJSON.playerList.forEach(player => {
+                container.classList.remove("invisible")
+                console.log(messageJSON.playerList)
+                for (const player in messageJSON.playerList) {
                     //Perhaps treat this as the other one, making a string for readability?
                     const playerDiv = document.createElement("div")
-                    container.classList.remove("invisible")
-                    const playerText = document.createElement("h2")
-                    const playerIcon = document.createElement("img")
-                    const playerIconDiv = document.createElement("div")
-                    const playerTextDiv = document.createElement("div")
-                    playerIconDiv.classList.add("playerIconDiv")
-                    playerTextDiv.classList.add("playerTextDiv")
-                    playerIcon.id = `icon-${player}`
-                    playerIcon.src = "/pictures/playericon.svg"
-                    playerIcon.classList.add("playerIcon")
-                    playerIcon.width = "55"
-                    playerText.textContent = player
-                    playerText.classList.add("text1")
                     playerDiv.classList.add("player")
                     playerDiv.id = player
-                    playerIconDiv.appendChild(playerIcon)
-                    playerTextDiv.appendChild(playerText)
-                    playerDiv.appendChild(playerIconDiv)
-                    playerDiv.appendChild(playerTextDiv)
                     playerDiv.addEventListener("click", () =>{
                         socket.send(JSON.stringify({
                             event: "myVote",
@@ -172,9 +157,15 @@ document.addEventListener("DOMContentLoaded", () => {
                             selectedPlayer.remove()
                         })
                     })
+                    setupString({
+                        name: player,
+                        clr: messageJSON.playerList[player]
+                    }).then(HTML => {
+                        playerDiv.innerHTML = HTML
+                    })
                     //container.appendChild(playerDiv)
                     container.insertBefore(playerDiv, skipBtn.parentElement)
-                })
+                }
                 break
                 case "resume":
                     taskCounter.startTimer()
@@ -294,3 +285,27 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     }
 })
+
+async function setupString({
+    name,
+    clr
+}) {
+    const svgData = await fetch("/pictures/playericon1.svg")
+    const svg = await svgData.text()
+    return(
+        `
+        <style>
+            #${name} .cls-2{
+            fill:${clr};
+            }
+            #${name} .playerIconDiv{
+            height: 100%;
+            }
+        </style>
+        <div class="plyerIconDiv" style=""> ${svg} </div>
+        <div class="playerTextDiv">
+            <h2 class="text1">${name}</h2>
+        </div>
+        `
+    )
+}

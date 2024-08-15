@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () =>{
         }
         taskCounter.timerCount = messageJSON.time
         taskCounter.startTimer()
+        emergencyBtn.classList.remove("invisible")
         container.classList.add("invisible")
         break
 
@@ -90,6 +91,9 @@ document.addEventListener("DOMContentLoaded", () =>{
         startBtn.remove()
         taskCounter.remove()
         //End game animation
+        setTimeout(() =>{
+          location.reload()
+        }, 5000)
         break
       default:
         console.error("Unknown message recived from WS")
@@ -115,16 +119,13 @@ fetchSVG(svg =>{
   playerDiv.classList.add("player")
   playerDiv.innerHTML =
   `
-  <div id="${username}" class="player">
     <div class="playerIconDiv">
       ${svg}
     </div>
     <div class="playerTextDiv">
       <h2 class="text1">${username}</h2>
     </div>
-  </div>
   `
-
 root.appendChild(playerDiv)
 //Hydration in the hydration...
 

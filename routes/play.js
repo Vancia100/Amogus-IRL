@@ -57,11 +57,16 @@ wss.on('connection', (ws) => {
             pushbackTaskcount = 0
 
             console.log("voting time!!!")
+            const playerList = [...players.keys()].reduce((pre, cur) =>{
+              const obj = {}
+              obj[cur] = players.get(cur).clr
+              return {...pre, ...obj}
+            }, {})
             currentGameTime = ms.time
             players.forEach(player =>{
               player.send(JSON.stringify({
                 action:"vote",
-                playerList: [...players.keys()]
+                playerList
               }))
             })
             break
