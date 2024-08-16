@@ -106,65 +106,60 @@ wss.on('connection', (ws) => {
         case "myVote":
           // Voting is a map of votes, defined on the top of the document
           voting.has(ms.player) ? 
-          voting.set(ms.player, voting.get(ms.player) +1) : 
-          voting.set(ms.player, 1)
-          const voteAmount = [...voting.values()].reduce((total, current) =>{
-            return total += current
-          })
-          console.log("Voting amount", voteAmount)
-          if (voteAmount == players.size) {
+          voting.get(ms.player).push(ws.clr) : 
+          voting.set(ms.player, [ws.clr])
+          voting.set(1, voting.has(1) ? voring.get(1) + 1 : 1) //Using 1 for total to not be a valid username
+          if (voting.get(1) == players.size) {
+            voting.delete(1)
             //Puts out the player with the most votes
-            const kickingPlayer = [...voting.entries()].reduce(([highestPlayer, highestCount], [player, count]) =>{
+            const kickingPlayer = [...voting.entries()].reduce(([highestPlayer, highestPlayerArray], [player, voteArray]) =>{
+              const count = voteArray.length
+              const highestCount = highestPlayerArray.length
               return [
                 count > highestCount ? player : count == highestCount ? null :highestPlayer,
-                count < highestCount ? highestCount : count
+                count < highestCount ? highestPlayerArray : count
               ]
-            }, ["", 0])[0];
-              hostClient.send(JSON.stringify({
-                ...{
-                  event:"voteKicked",
-                  voteList: {...voting},
-                  time: currentGameTime,
-                  },
-                ... function() {
-                  //First we define a function to run if the game resumes:
-                  const resumeFunction = function(){
-                    players.forEach(player =>{
-                      player.send(JSON.stringify({
-                        action:"resume",
-                        time: currentGameTime,
-                      }))
-                    })
-                  }
+            }, ["", []])[0];
 
-                  //Check if there is someone to be kicked:
-                  if (kickingPlayer) {
-                    const returnObj = {}
-                    //Voted out player "dies"
-                    players.get(kickingPlayer).send(JSON.stringify({
-                      action:"die"
-                    }))
-                    //Defines what is to be sent to host
-                    returnObj.player = kickingPlayer
-                    if (players.get(kickingPlayer).impostor) {
-                      returnObj.impostor = true,
-                      impostorCount --
-                    } else{
-                      returnObj.impostor = false
-                    }
-                    players.delete(kickingPlayer)
-
-                    //Does the game end? if not: run the function.
-                    checkEndGame(resumeFunction)
-
-                    //return object will be deconstructed and sent to the host
-                    return returnObj
-                  }
-                  //Nobody is killed, the games continues like usual
-                  resumeFunction()
-                  return {}
-                }()
+            hostClient.send(JSON.stringify(function() {
+              //First we define a function to run if the game resumes:
+              const resumeFunction = function(){
+                players.forEach(player =>{
+                  player.send(JSON.stringify({
+                    action:"resume",
+                    time: currentGameTime,
+                  }))
+                })
               }
+              const returnObj = {
+                event:"voteKicked",
+                voteList: Object.fromEntries(voting.entries()),
+                time: currentGameTime,
+              }
+              //Check if there is someone to be kicked:
+              if (kickingPlayer) {
+                //Voted out player "dies"
+                players.get(kickingPlayer).send(JSON.stringify({
+                  action:"die"
+                }))
+                //Defines what is to be sent to host
+                returnObj.player = kickingPlayer
+                if (players.get(kickingPlayer).impostor) {
+                  returnObj.impostor = true,
+                  impostorCount --
+                } else{
+                  returnObj.impostor = false
+                }
+                players.delete(kickingPlayer)
+               //Does the game end? if not: run the function.
+                checkEndGame(resumeFunction)
+               //return object will be deconstructed and sent to the host
+                return returnObj
+              }
+              //Nobody is killed, the games continues like usual
+              resumeFunction()
+              return returnObj
+              }()
             ))
             voting.clear()
           }

@@ -1,5 +1,6 @@
 .player{
     display: grid;
+    grid-template-rows: 1fr 0;  
     grid-template-columns: 10vh 1fr 10vh;
     align-items: center;
     cursor: pointer;
@@ -16,7 +17,16 @@
 .player div{
     text-align: center;
 }
-
+.playerVote{
+    position: relative;
+    grid-column: 2;
+    grid-row: 3;
+    bottom: 5vh;
+    height: 8vh;
+    gap: 5px;
+    display: flex;
+    flex-direction: row-reverse;
+}
 .container {
     display: flex;
     justify-content: space-around;
