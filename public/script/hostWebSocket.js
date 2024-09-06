@@ -2,7 +2,6 @@ import taskCounterObject from "./Object/taskCounterObject.js"
 let playerCount = 0
 
 const socket = new WebSocket(`ws://${window.location.hostname}:3001/play`)
-const livePlayers = []
 
 //Start game
 const startBtn = document.getElementById("startGameBtn")
@@ -73,16 +72,17 @@ socket.addEventListener("message", (message) => {
           const playerList = messageJSON.voteList[playerName]
           const playerVoteIconHolder = document.createElement("div")
           playerVoteIconHolder.classList.add("playerVote")
-          document.getElementById(playerName).appendChild(playerVoteIconHolder)
+          document.getElementById(playerName !== 0 ? playerName : "SkippedVote")?.appendChild(playerVoteIconHolder)
 
-          playerList && playerList.forEach(playerClr =>{
-            const tinyPlayerIcon = document.createElement("div")
-            tinyPlayerIcon.innerHTML = svg
-            tinyPlayerIcon.querySelector(".cls-2")?.setAttribute("fill", playerClr)
-            playerVoteIconHolder.appendChild(tinyPlayerIcon)
-          })
+          for (const i in playerList){
+            setTimeout(() =>{
+              const tinyPlayerIcon = document.createElement("div")
+              tinyPlayerIcon.innerHTML = svg
+              tinyPlayerIcon.querySelector(".cls-2")?.setAttribute("fill", playerList[i])
+              playerVoteIconHolder.appendChild(tinyPlayerIcon)
+            }, i * 500)
+          }
         }
-
         setTimeout(() =>{
           if (messageJSON.player){
             document.getElementById(messageJSON.player)?.remove()

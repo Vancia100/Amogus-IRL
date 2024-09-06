@@ -143,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 container.classList.remove("invisible")
                 console.log(messageJSON.playerList)
                 for (const player in messageJSON.playerList) {
-                    //Perhaps treat this as the other one, making a string for readability?
                     const playerDiv = document.createElement("div")
                     playerDiv.classList.add("player")
                     playerDiv.id = player
@@ -298,7 +297,7 @@ async function setupString({
             #${name} .cls-2{
             fill:${clr};
             }
-            #${name} .playerIconDiv{
+            .playerIconDiv{
             height: 100%;
             }
         </style>

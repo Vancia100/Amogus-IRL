@@ -108,18 +108,17 @@ wss.on('connection', (ws) => {
           voting.has(ms.player) ? 
           voting.get(ms.player).push(ws.clr) : 
           voting.set(ms.player, [ws.clr])
-          voting.set(1, voting.has(1) ? voring.get(1) + 1 : 1) //Using 1 for total to not be a valid username
+          voting.set(1, voting.has(1) ? voting.get(1) + 1 : 1) //Using 1 for total to not be a valid username
           if (voting.get(1) == players.size) {
             voting.delete(1)
             //Puts out the player with the most votes
-            const kickingPlayer = [...voting.entries()].reduce(([highestPlayer, highestPlayerArray], [player, voteArray]) =>{
+            const kickingPlayer = [...voting.entries()].reduce(([highestPlayer, highestCount], [player, voteArray]) =>{
               const count = voteArray.length
-              const highestCount = highestPlayerArray.length
               return [
                 count > highestCount ? player : count == highestCount ? null :highestPlayer,
-                count < highestCount ? highestPlayerArray : count
+                count < highestCount ? highestCount : count
               ]
-            }, ["", []])[0];
+            }, ["", 0])[0];
 
             hostClient.send(JSON.stringify(function() {
               //First we define a function to run if the game resumes:
@@ -138,6 +137,7 @@ wss.on('connection', (ws) => {
               }
               //Check if there is someone to be kicked:
               if (kickingPlayer) {
+                console.log("kicking player", kickingPlayer)
                 //Voted out player "dies"
                 players.get(kickingPlayer).send(JSON.stringify({
                   action:"die"

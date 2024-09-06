@@ -23,9 +23,13 @@
     grid-row: 3;
     bottom: 5vh;
     height: 8vh;
-    gap: 5px;
+    gap: 8vh;
     display: flex;
     flex-direction: row-reverse;
+}
+.playerVote > div {
+    animation-name: spawn;
+    animation-duration: 500ms;
 }
 .container {
     display: flex;
@@ -59,11 +63,22 @@
     max-height: 90%;
     cursor: pointer;
 }
-.toAnimete{
-    animation-duration: 5;
-    animation-name: sizeable;
-}
-@keyframes sizeable{
-    from{scale: 0%;}
-    75%{scale: 100%;}
+
+@keyframes spawn{
+    from {
+        transform: scale(0.2);
+        transform: translate(0, -15px);
+        transform: rotate(-25);
+    }
+    50%{
+        transform: translate(-5px, 0);
+    }
+    75%{
+        transform: translate(-2px, 2px);
+    }
+    to{
+        transform: scale(1);
+        transform: translate(0);
+        transform: rotate(-15);
+    }
 }
