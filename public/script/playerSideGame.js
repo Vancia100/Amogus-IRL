@@ -289,19 +289,12 @@ async function setupString({
     name,
     clr
 }) {
+    console.log(clr, "clr")
     const svgData = await fetch("/pictures/playericon1.svg")
     const svg = await svgData.text()
     return(
         `
-        <style>
-            #${name} .cls-2{
-            fill:${clr};
-            }
-            .playerIconDiv{
-            height: 100%;
-            }
-        </style>
-        <div class="plyerIconDiv" style=""> ${svg} </div>
+        <div class="plyerIconDiv" style=""> ${svg.slice(0, svg.indexOf('id="path2"')) + `fill="${clr}"` + svg.slice(svg.indexOf('id="path2"'))} </div>
         <div class="playerTextDiv">
             <h2 class="text1">${name}</h2>
         </div>

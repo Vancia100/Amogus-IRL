@@ -26,7 +26,7 @@ wss.on('connection', (ws) => {
   console.log('WebSocket client connected')
   ws.on('message', (message) => {
     ms = JSON.parse(message)
-    console.log('Received message from client:', ms)
+    console.log('Received message from client:', ws.playerId, ms)
 
     //If massage is from host
     if (ms.client == "HOST") {
@@ -56,7 +56,6 @@ wss.on('connection', (ws) => {
             pushbackTaskcount && incrementTaskCounter(pushbackTaskcount)
             pushbackTaskcount = 0
 
-            console.log("voting time!!!")
             const playerList = [...players.keys()].reduce((pre, cur) =>{
               const obj = {}
               obj[cur] = players.get(cur).clr
@@ -104,13 +103,19 @@ wss.on('connection', (ws) => {
           //else pushbackTaskcount ++
           break
         case "myVote":
-          // Voting is a map of votes, defined on the top of the document
+          if(!ws.hasVoted){ // this is in place due to some weird bug where it would register votes multiple times.
+            //No clue why it would do that, as it loged it as multiple messages, even when only one was sent.
+            ws.hasVoted = true
+            // Voting is a map of votes, defined on the top of the document
           voting.has(ms.player) ? 
           voting.get(ms.player).push(ws.clr) : 
           voting.set(ms.player, [ws.clr])
           voting.set(1, voting.has(1) ? voting.get(1) + 1 : 1) //Using 1 for total to not be a valid username
           if (voting.get(1) == players.size) {
             voting.delete(1)
+            wss.clients.forEach(client => {
+              client.hasVoted = false
+            })
             //Puts out the player with the most votes
             const kickingPlayer = [...voting.entries()].reduce(([highestPlayer, highestCount], [player, voteArray]) =>{
               const count = voteArray.length
@@ -119,7 +124,6 @@ wss.on('connection', (ws) => {
                 count < highestCount ? highestCount : count
               ]
             }, ["", 0])[0];
-
             hostClient.send(JSON.stringify(function() {
               //First we define a function to run if the game resumes:
               const resumeFunction = function(){
@@ -162,6 +166,7 @@ wss.on('connection', (ws) => {
               }()
             ))
             voting.clear()
+          }
           }
           break
         case "died":
